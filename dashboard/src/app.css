@@ -1,0 +1,66 @@
+/* Dark theme baseline. Refined in Sprint 3. */
+:root {
+  --bg:        #0f0f10;
+  --bg-soft:   #17171a;
+  --bg-hard:   #0a0a0b;
+  --border:    #2a2a2e;
+  --ink:       #e6e6e6;
+  --ink-dim:   #9a9aa0;
+  --ink-faint: #6b6b70;
+
+  --accent:     #7dd3fc;
+  --accent-dim: #3a4a56;
+
+  --ok:     #86efac;
+  --warn:   #fbbf24;
+  --danger: #f87171;
+
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  height: 100vh;
+  overflow: hidden;
+}
+
+code, pre, .mono {
+  font-family: var(--mono);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Minimal scrollbar styling for a clean dark feel. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a3e;
+}

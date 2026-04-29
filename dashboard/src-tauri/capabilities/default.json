@@ -1,0 +1,9 @@
+{
+  "$schema": "https://schema.tauri.app/config/2/../capability",
+  "identifier": "default",
+  "description": "Default permissions for the dashboard window. Read-only app — no shell, no filesystem write, no network. All I/O goes through typed Tauri commands.",
+  "windows": ["main"],
+  "permissions": [
+    "core:default"
+  ]
+}

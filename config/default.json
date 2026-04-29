@@ -1,0 +1,10 @@
+{
+  "profile": "balanced",
+  "max_retries": 2,
+  "telemetry_enabled": true,
+  "thresholds": {
+    "complexity_min_score": 40,
+    "depth_min_score": 40
+  },
+  "blocking_message_template": "[adaptive-guard] Your previous response appears surface-level for the complexity of the task. Specifically, you did not fully address:\n{missing_aspects}\nPlease reconsider with deeper analysis: evaluate trade-offs, consider edge cases, and structure your reasoning before responding again."
+}

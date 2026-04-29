@@ -1,0 +1,36 @@
+[package]
+name = "adaptive-guard-dashboard"
+version = "0.1.0"
+description = "Live desktop dashboard for adaptive-guard. Observability over every Claude Code decision."
+authors = ["Sthiven R."]
+license = "MIT"
+repository = "https://github.com/Sthiven-R/claude-code-adaptive-guard"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "adaptive_guard_dashboard_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+serde = { version = "1", features = ["derive"] }
+# preserve_order keeps the user's settings.json key order intact when we
+# round-trip it during install/uninstall. Without this, BTreeMap would
+# alphabetize keys and surprise users whose settings.json had a custom
+# order.
+serde_json = { version = "1", features = ["preserve_order"] }
+dirs = "5"
+notify = "6"
+notify-debouncer-full = "0.3"
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

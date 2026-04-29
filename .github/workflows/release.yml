@@ -1,0 +1,123 @@
+# Build the desktop dashboard for Windows, macOS (universal) and Linux
+# on every pushed tag, and attach the artifacts to a GitHub draft release.
+#
+# How to cut a release:
+#   1. Bump version in:
+#        - VERSION
+#        - dashboard/package.json
+#        - dashboard/src-tauri/Cargo.toml
+#        - dashboard/src-tauri/tauri.conf.json
+#      All four MUST agree.
+#   2. git commit + git tag vX.Y.Z + git push --tags
+#   3. CI runs, produces .msi / .dmg / .AppImage and uploads them to a
+#      draft release named "Adaptive Guard vX.Y.Z".
+#   4. Edit the draft on github.com to add release notes, mark it as
+#      pre-release if appropriate, then publish.
+#
+# Code signing is intentionally NOT configured here. Unsigned binaries
+# work but show platform warnings on first run:
+#   - Windows: SmartScreen "unrecognized publisher" — click More info → Run anyway.
+#   - macOS: Gatekeeper "cannot verify developer" — right-click the
+#     .app → Open → Open. Or `xattr -dr com.apple.quarantine /Applications/Adaptive\ Guard.app`.
+#   - Linux AppImage: no warning, just runs.
+# When we have signing certs, they go into repo secrets and the matrix
+# steps below will pick them up via tauri-action's documented inputs.
+
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: ubuntu-22.04
+            args: ""
+          - platform: macos-14
+            args: "--target universal-apple-darwin"
+          - platform: windows-latest
+            args: ""
+
+    runs-on: ${{ matrix.platform }}
+
+    defaults:
+      run:
+        working-directory: dashboard
+
+    steps:
+      - name: Validate tag format
+        # Reject anything that is not a strict semver tag like v1.2.3 or
+        # v1.2.3-rc.1. The tag name lands verbatim in the release title
+        # and the artifact filenames; an attacker who can push tags to
+        # the repo could otherwise embed misleading release titles.
+        # Branch protection on the tag namespace is the real fence; this
+        # is defense-in-depth.
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          tag="${{ github.ref_name }}"
+          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.]+)?$ ]]; then
+            echo "::error::tag '$tag' does not match v<MAJOR>.<MINOR>.<PATCH>[-PRERELEASE]"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - name: Install Linux build dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          # macOS universal needs both x86_64 and aarch64 targets.
+          # Other platforms ignore unknown targets gracefully.
+          targets: ${{ matrix.platform == 'macos-14' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: dashboard/src-tauri -> target
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: dashboard
+          tagName: ${{ github.ref_name }}
+          releaseName: "Adaptive Guard ${{ github.ref_name }}"
+          releaseBody: |
+            Desktop dashboard for adaptive-guard. Download the bundle for your platform below.
+
+            **First-run warnings (expected, unsigned build):**
+            - Windows: SmartScreen — *More info → Run anyway*.
+            - macOS: Gatekeeper — right-click the .app → *Open → Open*.
+
+            See the README for the full install / setup flow.
+          releaseDraft: true
+          prerelease: true
+          args: ${{ matrix.args }}

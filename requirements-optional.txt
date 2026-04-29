@@ -1,0 +1,8 @@
+# Optional dependency for semantic scoring via embeddings.
+# If not installed, the guard falls back to structural signals.
+#
+# Install with:
+#   pip install -r requirements-optional.txt
+#
+# Footprint: ~100 MB (ONNX runtime + multilingual model weights)
+fastembed>=0.3.0

@@ -1,0 +1,2 @@
+{"type":"user","message":{"role":"user","content":"hi"},"timestamp":"2026-04-21T10:00:00Z","uuid":"test-user-3","sessionId":"fixture-3"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Hi. How can I help?"}]},"timestamp":"2026-04-21T10:00:01Z","uuid":"test-asst-3","sessionId":"fixture-3"}

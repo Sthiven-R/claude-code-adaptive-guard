@@ -1,0 +1,75 @@
+# Lightweight check on PRs and pushes to main. Validates the dashboard
+# builds and the Rust + frontend type-check. No bundle / no upload.
+#
+# Runs on Ubuntu only — full multi-OS bundling is reserved for the
+# release workflow because it is slow and consumes Actions minutes.
+
+name: check
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+jobs:
+  dashboard:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: dashboard
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: dashboard/src-tauri -> target
+
+      - run: npm ci
+
+      - name: Frontend type-check
+        run: npm run check
+
+      - name: Rust clippy
+        working-directory: dashboard/src-tauri
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Rust unit tests
+        working-directory: dashboard/src-tauri
+        run: cargo test --lib
+
+  hooks:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Bash syntax check (entrypoint + scripts)
+        # Catches syntax regressions in the hook entrypoint and helper
+        # scripts before the test suite spawns subprocesses through them.
+        run: |
+          for f in hooks/*.sh scripts/*.sh; do
+            bash -n "$f"
+          done
+      - name: Run hook test suite
+        run: python -m pytest tests/ -q

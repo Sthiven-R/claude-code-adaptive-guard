@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+# adaptive-guard - Global CLI dispatcher for Unix shells (bash/zsh).
+#
+# This script is installed to ~/bin or equivalent by
+# scripts/setup-global.sh. It reads the repo location from
+# ~/.adaptive-guard/config and dispatches subcommands to the
+# corresponding script in the repo.
+
+set -euo pipefail
+
+CONFIG_FILE="${HOME}/.adaptive-guard/config"
+
+if [ ! -f "$CONFIG_FILE" ]; then
+  echo "Error: adaptive-guard is not set up on this machine." >&2
+  echo "Run setup-global.sh from the repo first:" >&2
+  echo "   cd <repo-path> && ./scripts/setup-global.sh" >&2
+  exit 1
+fi
+
+REPO_ROOT=""
+# Parse simple KEY=VALUE config
+while IFS='=' read -r key value; do
+  case "$key" in
+    REPO_ROOT)
+      REPO_ROOT="$value"
+      ;;
+  esac
+done <"$CONFIG_FILE"
+
+if [ -z "$REPO_ROOT" ]; then
+  echo "Error: REPO_ROOT not found in $CONFIG_FILE." >&2
+  echo "Re-run setup-global.sh to fix." >&2
+  exit 1
+fi
+
+if [ ! -d "$REPO_ROOT" ]; then
+  echo "Error: repo path does not exist: $REPO_ROOT" >&2
+  echo "The repo may have been moved. Re-run setup-global.sh from the new location." >&2
+  exit 1
+fi
+
+print_help() {
+  cat <<EOF
+adaptive-guard - quality control layer for Claude Code
+
+USAGE:
+  adaptive-guard <command> [args...]
+
+COMMANDS:
+  install [--profile balanced|strict|lenient]
+                        Install the Stop hook into ~/.claude/settings.json.
+  uninstall             Remove the hook.
+  stats [--last N] [--today] [--recent N] [--session ID]
+                        Inspect decision history.
+  explain               Score any prompt/response interactively.
+  dashboard             Launch the desktop dashboard window.
+  version               Print version.
+  help                  This message.
+
+REPO:   $REPO_ROOT
+EOF
+}
+
+print_version() {
+  if [ -f "$REPO_ROOT/VERSION" ]; then
+    echo "adaptive-guard $(cat "$REPO_ROOT/VERSION" | head -1 | tr -d '\n\r ')"
+  else
+    echo "adaptive-guard (version unknown)"
+  fi
+}
+
+if [ $# -lt 1 ] || [ "$1" = "help" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  print_help
+  exit 0
+fi
+
+if [ "$1" = "version" ] || [ "$1" = "--version" ] || [ "$1" = "-v" ]; then
+  print_version
+  exit 0
+fi
+
+SUBCOMMAND="$1"
+shift
+
+SCRIPT="$REPO_ROOT/scripts/${SUBCOMMAND}.sh"
+if [ ! -f "$SCRIPT" ]; then
+  echo "Error: unknown subcommand: $SUBCOMMAND" >&2
+  echo "Run 'adaptive-guard help' for the list." >&2
+  exit 1
+fi
+
+exec bash "$SCRIPT" "$@"

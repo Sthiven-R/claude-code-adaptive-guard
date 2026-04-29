@@ -1,0 +1,9 @@
+{
+  "extends": "default",
+  "profile": "strict",
+  "max_retries": 3,
+  "thresholds": {
+    "complexity_min_score": 30,
+    "depth_min_score": 55
+  }
+}
