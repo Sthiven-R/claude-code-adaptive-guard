@@ -64,6 +64,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install test dependencies
+        # pytest is the only test-time dependency. The hook itself runs
+        # on the standard library; fastembed (for semantic scoring) is
+        # listed in requirements-optional.txt and is not exercised here
+        # because tests cover the structural-only path that the hook
+        # falls back to when the embedder is unavailable.
+        run: pip install pytest
       - name: Bash syntax check (entrypoint + scripts)
         # Catches syntax regressions in the hook entrypoint and helper
         # scripts before the test suite spawns subprocesses through them.
