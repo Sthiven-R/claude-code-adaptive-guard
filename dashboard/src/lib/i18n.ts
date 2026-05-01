@@ -125,6 +125,10 @@ const en = {
     language_section: "Language",
     language_english: "English",
     language_spanish: "Español",
+    theme_section: "Theme",
+    theme_dark: "Dark",
+    theme_light: "Light",
+    theme_auto: "Auto",
   },
   stats: {
     profile: "profile:",
@@ -296,6 +300,10 @@ const es = {
     language_section: "Idioma",
     language_english: "English",
     language_spanish: "Español",
+    theme_section: "Tema",
+    theme_dark: "Oscuro",
+    theme_light: "Claro",
+    theme_auto: "Auto",
   },
   stats: {
     profile: "perfil:",

@@ -2,6 +2,8 @@
   import { invoke } from "@tauri-apps/api/core";
   import type { HookStatus, InstallResult } from "../types";
   import { lang, t, type Lang } from "../i18n";
+  import { themeMode, type ThemeMode } from "../stores/theme";
+  import Icon from "./Icon.svelte";
 
   let { hook, version, onClose, onChanged }: {
     hook: HookStatus;
@@ -12,6 +14,10 @@
 
   function setLang(l: Lang) {
     lang.set(l);
+  }
+
+  function setTheme(m: ThemeMode) {
+    themeMode.set(m);
   }
 
   let busy = $state(false);
@@ -82,7 +88,9 @@
   >
     <header>
       <h2 id="settings-title">{$t.settings.title}</h2>
-      <button class="close" onclick={onClose} aria-label={$t.settings.close}>×</button>
+      <button class="close" onclick={onClose} aria-label={$t.settings.close}>
+        <Icon name="close" size={18} />
+      </button>
     </header>
 
     <section>
@@ -147,9 +155,9 @@
 
     <section>
       <h3>{$t.settings.language_section}</h3>
-      <div class="lang-toggle" role="radiogroup" aria-label={$t.settings.language_section}>
+      <div class="seg-toggle" role="radiogroup" aria-label={$t.settings.language_section}>
         <button
-          class="lang-btn"
+          class="seg-btn"
           class:active={$lang === "en"}
           role="radio"
           aria-checked={$lang === "en"}
@@ -158,13 +166,46 @@
           {$t.settings.language_english}
         </button>
         <button
-          class="lang-btn"
+          class="seg-btn"
           class:active={$lang === "es"}
           role="radio"
           aria-checked={$lang === "es"}
           onclick={() => setLang("es")}
         >
           {$t.settings.language_spanish}
+        </button>
+      </div>
+    </section>
+
+    <section>
+      <h3>{$t.settings.theme_section}</h3>
+      <div class="seg-toggle" role="radiogroup" aria-label={$t.settings.theme_section}>
+        <button
+          class="seg-btn"
+          class:active={$themeMode === "dark"}
+          role="radio"
+          aria-checked={$themeMode === "dark"}
+          onclick={() => setTheme("dark")}
+        >
+          {$t.settings.theme_dark}
+        </button>
+        <button
+          class="seg-btn"
+          class:active={$themeMode === "light"}
+          role="radio"
+          aria-checked={$themeMode === "light"}
+          onclick={() => setTheme("light")}
+        >
+          {$t.settings.theme_light}
+        </button>
+        <button
+          class="seg-btn"
+          class:active={$themeMode === "auto"}
+          role="radio"
+          aria-checked={$themeMode === "auto"}
+          onclick={() => setTheme("auto")}
+        >
+          {$t.settings.theme_auto}
         </button>
       </div>
     </section>
@@ -438,34 +479,35 @@
     color: var(--ink-faint);
   }
 
-  .lang-toggle {
+  .seg-toggle {
     display: inline-flex;
-    border: 1px solid var(--border);
-    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
     overflow: hidden;
-    font-size: 12px;
+    font-size: var(--text-small);
   }
-  .lang-btn {
-    background: var(--bg-hard);
+  .seg-btn {
+    background: var(--color-bg-base);
     border: none;
-    color: var(--ink-dim);
+    color: var(--color-ink-dim);
     padding: 6px 14px;
     border-radius: 0;
     cursor: pointer;
-    transition: all 0.15s ease;
-    font-family: var(--mono);
+    transition: background var(--duration-fast) var(--ease-standard),
+                color var(--duration-fast) var(--ease-standard);
+    font-family: var(--font-mono);
   }
-  .lang-btn:not(:last-child) {
-    border-right: 1px solid var(--border);
+  .seg-btn:not(:last-child) {
+    border-right: 1px solid var(--color-border);
   }
-  .lang-btn:hover:not(.active):not(:disabled) {
-    color: var(--ink);
-    background: var(--bg-soft);
+  .seg-btn:hover:not(.active):not(:disabled) {
+    color: var(--color-ink);
+    background: var(--color-bg-elevated);
   }
-  .lang-btn.active {
-    background: var(--accent);
-    color: var(--bg);
-    font-weight: 600;
+  .seg-btn.active {
+    background: var(--color-accent);
+    color: var(--color-ink-on-accent);
+    font-weight: var(--weight-semibold);
   }
 
   footer {

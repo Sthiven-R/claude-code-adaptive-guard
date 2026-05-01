@@ -2,6 +2,7 @@
   import { invoke } from "@tauri-apps/api/core";
   import type { HookStatus, InstallResult } from "../types";
   import { t } from "../i18n";
+  import Logo from "./Logo.svelte";
 
   let { status, onInstalled, onSkip }: {
     status: HookStatus;
@@ -47,8 +48,7 @@
 
 <section class="welcome">
   <header>
-    <span class="dot"></span>
-    <h1>adaptive-guard</h1>
+    <Logo variant="full" size={28} />
     <span class="tag">{$t.welcome.badge}</span>
   </header>
 
@@ -134,31 +134,16 @@
     gap: 10px;
     margin-bottom: 18px;
   }
-  header .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 10px var(--accent);
-  }
-  h1 {
-    margin: 0;
-    font-family: var(--mono);
-    font-size: 18px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    color: var(--ink);
-  }
   .tag {
     margin-left: auto;
-    font-family: var(--mono);
-    font-size: 10px;
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-micro);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--accent);
-    border: 1px solid var(--accent-dim);
+    letter-spacing: var(--tracking-widest);
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent-dim);
     padding: 2px 8px;
-    border-radius: 4px;
+    border-radius: var(--radius-xs);
   }
 
   .lede {

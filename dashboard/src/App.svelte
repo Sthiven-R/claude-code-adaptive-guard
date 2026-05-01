@@ -18,6 +18,7 @@
   import LiveIndicator from "./lib/components/LiveIndicator.svelte";
   import Welcome from "./lib/components/Welcome.svelte";
   import SettingsModal from "./lib/components/SettingsModal.svelte";
+  import Icon from "./lib/components/Icon.svelte";
 
   // Version is fetched from the Tauri backend (CARGO_PKG_VERSION) so
   // there is one source of truth for the four version-bearing files
@@ -142,10 +143,7 @@
     aria-label={$t.app.settings_label}
     title={$t.app.settings_label}
   >
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="3"></circle>
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-    </svg>
+    <Icon name="gear" size={16} />
   </button>
 
   {#if showWelcome && hook}
@@ -219,11 +217,35 @@
 
     {#if displayRecords.length === 0}
       <div class="empty">
-        {#if recent.length === 0}
-          {$t.app.no_decisions_yet}
-        {:else}
-          {$t.app.no_match_filters}
-        {/if}
+        <!--
+          Empty illustration: a faint waveform that mirrors the logo
+          mark, signaling "the channel is open, no signal yet" rather
+          than "broken". Decorative; aria-hidden because the surround
+          text already conveys the state.
+        -->
+        <svg
+          class="empty-art"
+          width="140"
+          height="56"
+          viewBox="0 0 140 56"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <line x1="14" y1="46" x2="126" y2="46" opacity="0.18" />
+          <line x1="14" y1="32" x2="126" y2="32" opacity="0.28" stroke-dasharray="4 5" />
+          <path d="M 14 16 L 38 16 L 48 6 L 68 26 L 78 16 L 126 16" opacity="0.55" />
+        </svg>
+        <p class="empty-text">
+          {#if recent.length === 0}
+            {$t.app.no_decisions_yet}
+          {:else}
+            {$t.app.no_match_filters}
+          {/if}
+        </p>
       </div>
     {:else}
       <div class="list">
@@ -283,20 +305,26 @@
     right: 28px;
     background: transparent;
     border: 1px solid transparent;
-    color: var(--ink-faint);
+    color: var(--color-ink-faint);
     padding: 6px;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     z-index: 10;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.15s ease;
+    transition: color var(--duration-fast) var(--ease-standard),
+                border-color var(--duration-fast) var(--ease-standard),
+                background var(--duration-fast) var(--ease-standard),
+                transform var(--duration-fast) var(--ease-standard);
   }
   .gear:hover {
-    color: var(--ink);
-    border-color: var(--border);
-    background: var(--bg-soft);
+    color: var(--color-ink);
+    border-color: var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+  .gear:active {
+    transform: scale(0.94);
   }
 
   .inline-link {
@@ -427,10 +455,23 @@
   }
 
   .empty {
-    color: var(--ink-faint);
-    font-size: 13px;
+    color: var(--color-ink-faint);
+    font-size: var(--text-small);
     text-align: center;
-    padding: 30px 0;
+    padding: var(--space-10) var(--space-4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .empty-art {
+    color: var(--color-accent);
+    opacity: 0.85;
+  }
+  .empty-text {
+    margin: 0;
+    max-width: 340px;
+    line-height: var(--leading-relaxed);
   }
 
   .load-more {

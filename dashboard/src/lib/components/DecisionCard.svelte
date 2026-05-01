@@ -3,6 +3,7 @@
   import { formatListLabel, formatRelative } from "../time";
   import { fmt, t } from "../i18n";
   import BreakdownPanel from "./BreakdownPanel.svelte";
+  import Icon from "./Icon.svelte";
 
   let { record, now }: { record: TelemetryRecord; now: Date } = $props();
 
@@ -68,7 +69,9 @@
       {/if}
     </div>
 
-    <div class="chev" aria-hidden="true">{expanded ? "▾" : "▸"}</div>
+    <div class="chev" class:expanded aria-hidden="true">
+      <Icon name="chevron" size={14} />
+    </div>
   </button>
 
   {#if expanded}
@@ -126,32 +129,40 @@
 
 <style>
   .card {
-    background: var(--bg-soft);
-    border: 1px solid var(--border);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
     border-left-width: 3px;
-    border-radius: 8px;
-    margin-bottom: 8px;
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-2);
     overflow: hidden;
-    transition: border-color 0.15s ease;
+    transition: border-color var(--duration-base) var(--ease-standard),
+                box-shadow var(--duration-base) var(--ease-standard),
+                transform var(--duration-base) var(--ease-standard);
+  }
+  .card:hover {
+    border-color: var(--color-border-hover);
+    box-shadow: var(--elevation-2);
+    transform: translateY(-1px);
   }
   .card.block {
-    border-left-color: var(--danger);
+    border-left-color: var(--color-danger);
   }
   .card.deep {
-    border-left-color: var(--ok);
+    border-left-color: var(--color-success);
   }
   .card.simple {
-    border-left-color: var(--border);
+    border-left-color: var(--color-border);
   }
   .card.expanded {
-    border-color: var(--accent-dim);
+    border-color: var(--color-accent);
+    box-shadow: var(--elevation-2);
   }
 
   .summary {
     width: 100%;
     background: none;
     border: none;
-    color: var(--ink);
+    color: var(--color-ink);
     display: grid;
     grid-template-columns: 70px 1fr 120px 1fr 24px;
     align-items: center;
@@ -159,9 +170,10 @@
     padding: 12px 14px;
     text-align: left;
     cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-standard);
   }
   .summary:hover {
-    background: rgba(125, 211, 252, 0.05);
+    background: var(--color-accent-dim);
   }
 
   .tag {
@@ -227,9 +239,14 @@
   }
 
   .chev {
-    color: var(--ink-faint);
-    font-size: 14px;
-    text-align: center;
+    color: var(--color-ink-faint);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--duration-base) var(--ease-out-quart);
+  }
+  .chev.expanded {
+    transform: rotate(90deg);
   }
 
   .details {

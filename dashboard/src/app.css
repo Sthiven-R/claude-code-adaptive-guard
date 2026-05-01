@@ -1,23 +1,9 @@
-/* Dark theme baseline. Refined in Sprint 3. */
-:root {
-  --bg:        #0f0f10;
-  --bg-soft:   #17171a;
-  --bg-hard:   #0a0a0b;
-  --border:    #2a2a2e;
-  --ink:       #e6e6e6;
-  --ink-dim:   #9a9aa0;
-  --ink-faint: #6b6b70;
-
-  --accent:     #7dd3fc;
-  --accent-dim: #3a4a56;
-
-  --ok:     #86efac;
-  --warn:   #fbbf24;
-  --danger: #f87171;
-
-  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-}
+/*
+ * Baseline reset + body styling. Token definitions live in
+ * ./lib/styles/tokens.css and are imported before this file in
+ * main.ts. Anything that should change between themes must read
+ * a --color-* token, never a literal hex.
+ */
 
 * {
   box-sizing: border-box;
@@ -27,12 +13,13 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--sans);
-  font-size: 14px;
-  line-height: 1.5;
+  background: var(--color-bg-base);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--leading-normal);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 #app {
@@ -41,7 +28,7 @@ html, body {
 }
 
 code, pre, .mono {
-  font-family: var(--mono);
+  font-family: var(--font-mono);
 }
 
 button {
@@ -49,7 +36,25 @@ button {
   cursor: pointer;
 }
 
-/* Minimal scrollbar styling for a clean dark feel. */
+/* Visible focus ring for keyboard navigation. The :focus-visible
+ * pseudo-class only matches when the user reached the element via
+ * keyboard, so mouse clicks stay free of the outline.
+ */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Selection respects the accent color so highlighted text reads
+ * as part of the brand instead of the OS default blue. */
+::selection {
+  background: var(--color-accent-dim);
+  color: var(--color-ink);
+}
+
+/* Scrollbar styling. WebKit only (Tauri's webview is WebKit-based
+ * on every supported platform). */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -58,9 +63,10 @@ button {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 5px;
+  background: var(--color-border);
+  border-radius: var(--radius-sm);
+  transition: background var(--duration-fast) var(--ease-standard);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3a3a3e;
+  background: var(--color-border-hover);
 }

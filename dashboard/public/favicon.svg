@@ -1,0 +1,25 @@
+<!--
+  Adaptive Guard favicon. Standalone copy of the logo symbol so the
+  browser/Tauri shell can fetch it at /favicon.svg without going
+  through the Svelte component pipeline. Keep in sync with
+  src/lib/components/Logo.svelte if the mark ever changes.
+
+  Color is hardcoded (cyan-400) because favicons are fetched outside
+  the app's CSS context — design tokens are not available here.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <rect width="32" height="32" rx="6" fill="#09090b"/>
+  <path
+    d="M 25.53 11.5 A 11 11 0 1 0 21.5 25.53"
+    stroke="#22d3ee"
+    stroke-width="2.5"
+    stroke-linecap="round"
+  />
+  <path
+    d="M 7 17 L 11.5 17 L 13.5 13 L 17 21 L 19 17 L 25 17"
+    stroke="#22d3ee"
+    stroke-width="2.25"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>
