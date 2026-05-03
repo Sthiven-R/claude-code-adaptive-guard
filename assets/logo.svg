@@ -1,0 +1,36 @@
+<!--
+  adaptive-guard logo (mark + wordmark, horizontal lockup).
+  Single source of truth for the logo as it appears in the README
+  hero. Keep in sync with dashboard/src/lib/components/Logo.svelte
+  and dashboard/public/favicon.svg if the mark ever changes.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" fill="none">
+  <!-- Mark -->
+  <g transform="translate(8, 16)">
+    <path
+      d="M 25.53 11.5 A 11 11 0 1 0 21.5 25.53"
+      stroke="#22d3ee"
+      stroke-width="2.5"
+      stroke-linecap="round"
+      transform="scale(1.5)"
+    />
+    <path
+      d="M 7 17 L 11.5 17 L 13.5 13 L 17 21 L 19 17 L 25 17"
+      stroke="#22d3ee"
+      stroke-width="2.25"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      transform="scale(1.5)"
+    />
+  </g>
+  <!-- Wordmark -->
+  <text
+    x="80"
+    y="52"
+    font-family="JetBrains Mono, ui-monospace, SFMono-Regular, monospace"
+    font-size="32"
+    font-weight="600"
+    fill="#e6e6e6"
+    letter-spacing="-0.5"
+  >adaptive<tspan fill="#22d3ee" font-weight="700">·</tspan>guard</text>
+</svg>

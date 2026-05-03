@@ -1,6 +1,27 @@
-# adaptive-guard
+<p align="center">
+  <img src="assets/logo.svg" alt="adaptive-guard" width="320" />
+</p>
 
-> **A quality hook for Claude Code that catches surface-level responses and forces the model to reconsider with more depth.**
+<p align="center">
+  <strong>Live telemetry for every Claude Code decision.</strong><br>
+  A Stop-hook that catches surface-level responses and forces the model to reconsider with more depth.
+</p>
+
+<p align="center">
+  <a href="https://github.com/Sthiven-R/claude-code-adaptive-guard/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
+  <a href="https://github.com/Sthiven-R/claude-code-adaptive-guard/releases"><img src="https://img.shields.io/github/v/release/Sthiven-R/claude-code-adaptive-guard?include_prereleases&color=22d3ee" alt="Latest release"></a>
+  <a href="https://github.com/Sthiven-R/claude-code-adaptive-guard/actions/workflows/check.yml"><img src="https://github.com/Sthiven-R/claude-code-adaptive-guard/actions/workflows/check.yml/badge.svg" alt="CI"></a>
+</p>
+
+<p align="center">
+  <img src="assets/dashboard-hero.svg" alt="Adaptive Guard dashboard" width="100%">
+  <br>
+  <sub><i>Provisional mock — replaced with a real screenshot once the desktop bundle is built. See <a href="assets/README.md">assets/README.md</a>.</i></sub>
+</p>
+
+---
+
+## What it is
 
 Claude Opus 4.7 ships with a feature called **adaptive thinking**: the model decides on its own how much to think before responding, based on the perceived difficulty of the task.
 
@@ -17,9 +38,6 @@ In theory, great. In practice, the internal router that makes that decision misj
 The result: Claude gets a second chance with explicit feedback — the same mechanism a thoughtful code reviewer would use.
 
 It ships with a **native desktop dashboard** (Tauri + Svelte) that watches the telemetry file in real time, so every decision is observable as it happens.
-
-<!-- Screenshot pending — will be added in a follow-up commit. -->
-<!-- ![Adaptive Guard dashboard](docs/screenshots/dashboard.png) -->
 
 ---
 
@@ -193,16 +211,14 @@ A native Tauri + Svelte 5 window that reads `~/.claude/telemetry/adaptive-guard.
 - System tray integration — close window minimizes to tray; the watcher keeps running.
 - First-run welcome flow with one-click hook install (writes `~/.claude/settings.json` with timestamped backup).
 - Bilingual UI: English / Español, switchable from the gear menu, persisted across launches. Default detected from your OS locale.
+- Theme toggle: Dark, Light, or Auto (follows `prefers-color-scheme`). Persisted across launches.
 
-**Welcome flow (first launch on a fresh machine):**
-
-<!-- Screenshot pending — will be added in a follow-up commit. -->
-<!-- ![Welcome screen](docs/screenshots/welcome.png) -->
-
-**Settings panel (gear icon, top-right):**
-
-<!-- Screenshot pending — will be added in a follow-up commit. -->
-<!-- ![Settings panel](docs/screenshots/settings.png) -->
+<!--
+  Welcome / settings screenshots will land here once the operator
+  captures them from the built bundle. Holding off on placeholders
+  to keep the rendered README clean — the hero illustration above
+  already carries the visual weight.
+-->
 
 
 ### Launch the dashboard
@@ -292,9 +308,9 @@ Setting `ADAPTIVE_GUARD_TELEMETRY_DISABLED=1` prevents tests from writing to you
 
 ## Roadmap
 
-- **v0.1** (current) — Structural + optional semantic scoring, native desktop dashboard with live watcher, system tray integration, bilingual UI (en/es), in-app install/uninstall, multi-OS bundles via CI.
+- **v0.1** (current) — Structural + optional semantic scoring, native desktop dashboard with live watcher, system tray integration, bilingual UI (en/es), in-app install/uninstall, dark / light / auto theme toggle, multi-OS bundles via CI.
 - **v0.2** — Code-signed releases (Authenticode + Apple Developer ID), auto-updater, per-project config (detect context from repo path), expanded anchor sets.
-- **v0.3** — Local LLM judge for edge cases the embedder misclassifies, decision export (CSV/JSON), keyboard shortcuts, light/dark theme toggle.
+- **v0.3** — Local LLM judge for edge cases the embedder misclassifies, decision export (CSV/JSON), keyboard shortcuts, command palette.
 
 ---
 

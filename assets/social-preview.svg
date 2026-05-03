@@ -1,0 +1,81 @@
+<!--
+  GitHub social preview for adaptive-guard. Dimensions match GitHub's
+  expected social card size (1280x640). Convert to PNG before
+  uploading: any of `Figma export PNG @1x`, `Inkscape -e`, or
+  `magick social-preview.svg social-preview.png` will work.
+
+  Upload at: Settings → General → Social preview → Edit (PNG only).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" fill="none">
+  <defs>
+    <!-- Subtle accent glow under the mark, top-left bias. -->
+    <radialGradient id="accent-glow" cx="0.3" cy="0.45" r="0.45">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.20" />
+      <stop offset="60%" stop-color="#22d3ee" stop-opacity="0.04" />
+      <stop offset="100%" stop-color="#22d3ee" stop-opacity="0" />
+    </radialGradient>
+    <!-- Vignette so the corners read as canvas, not as hard edges. -->
+    <radialGradient id="vignette" cx="0.5" cy="0.5" r="0.75">
+      <stop offset="60%" stop-color="#000000" stop-opacity="0" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.5" />
+    </radialGradient>
+  </defs>
+
+  <!-- Canvas -->
+  <rect width="1280" height="640" fill="#09090b" />
+  <rect width="1280" height="640" fill="url(#accent-glow)" />
+  <rect width="1280" height="640" fill="url(#vignette)" />
+
+  <!-- Hairline border for the safe area, so we know the export
+       crops within the visible bounds. -->
+  <rect x="0.5" y="0.5" width="1279" height="639" fill="none" stroke="#1a1a1f" stroke-width="1" />
+
+  <!-- Mark: scaled 9x from the 32-unit master = ~288px. -->
+  <g transform="translate(150, 176) scale(9)">
+    <path
+      d="M 25.53 11.5 A 11 11 0 1 0 21.5 25.53"
+      stroke="#22d3ee"
+      stroke-width="2.5"
+      stroke-linecap="round"
+    />
+    <path
+      d="M 7 17 L 11.5 17 L 13.5 13 L 17 21 L 19 17 L 25 17"
+      stroke="#22d3ee"
+      stroke-width="2.25"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </g>
+
+  <!-- Wordmark + tagline + footer line, right-side stack. -->
+  <text
+    x="540"
+    y="328"
+    font-family="JetBrains Mono, ui-monospace, SFMono-Regular, monospace"
+    font-size="72"
+    font-weight="600"
+    fill="#fafafa"
+    letter-spacing="-1"
+  >adaptive<tspan fill="#22d3ee" font-weight="700">·</tspan>guard</text>
+
+  <text
+    x="540"
+    y="392"
+    font-family="Inter, system-ui, -apple-system, sans-serif"
+    font-size="30"
+    font-weight="400"
+    fill="#a1a1aa"
+  >Live telemetry for every Claude Code decision.</text>
+
+  <!-- Three-dot separator + meta line. -->
+  <line x1="540" y1="498" x2="640" y2="498" stroke="#27272a" stroke-width="1" />
+  <text
+    x="540"
+    y="540"
+    font-family="JetBrains Mono, ui-monospace, monospace"
+    font-size="18"
+    font-weight="500"
+    fill="#71717a"
+    letter-spacing="2"
+  >v0.1.0 · MIT · LOCAL · OPEN SOURCE</text>
+</svg>
