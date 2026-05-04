@@ -23,3 +23,9 @@ Thumbs.db
 # Local overrides
 config/local.json
 .env
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
