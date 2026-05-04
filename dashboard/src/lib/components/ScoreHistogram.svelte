@@ -36,8 +36,8 @@
   }
 
   function barColor(lo: number): string {
-    if (threshold === null) return "var(--accent)";
-    return lo + 10 <= threshold ? "var(--ink-faint)" : "var(--accent)";
+    if (threshold === null) return "var(--color-accent)";
+    return lo + 10 <= threshold ? "var(--color-ink-faint)" : "var(--color-accent)";
   }
 </script>
 
@@ -75,9 +75,9 @@
 
 <style>
   .histogram {
-    background: var(--bg-soft);
-    border: 1px solid var(--border);
-    border-radius: 10px;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
     padding: 14px 18px 12px;
   }
 
@@ -90,17 +90,17 @@
 
   h3 {
     margin: 0;
-    font-size: 11px;
+    font-size: var(--text-micro);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--ink-dim);
-    font-weight: 600;
+    letter-spacing: var(--tracking-widest);
+    color: var(--color-ink-dim);
+    font-weight: var(--weight-semibold);
   }
 
   .total {
-    color: var(--ink-faint);
-    font-size: 11px;
-    font-family: var(--mono);
+    color: var(--color-ink-faint);
+    font-size: var(--text-mono-small);
+    font-family: var(--font-mono);
   }
 
   .bars {
@@ -128,24 +128,24 @@
 
   .bar {
     width: 90%;
-    border-radius: 3px 3px 0 0;
-    transition: height 0.2s ease;
+    border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+    transition: height var(--duration-base) var(--ease-out-quart);
   }
 
   .label {
     margin-top: 4px;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--ink-dim);
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-micro);
+    color: var(--color-ink-dim);
   }
   .label.dim {
-    color: var(--ink-faint);
+    color: var(--color-ink-faint);
   }
 
   .legend {
     margin-top: 8px;
-    font-size: 11px;
-    color: var(--ink-faint);
+    font-size: var(--text-micro);
+    color: var(--color-ink-faint);
     display: flex;
     align-items: center;
     gap: 6px;
@@ -155,19 +155,19 @@
     display: inline-block;
     width: 10px;
     height: 10px;
-    border-radius: 2px;
+    border-radius: var(--radius-xs);
     margin: 0 2px 0 4px;
   }
   .swatch.below {
-    background: var(--ink-faint);
+    background: var(--color-ink-faint);
   }
   .swatch.above {
-    background: var(--accent);
+    background: var(--color-accent);
   }
 
   .empty {
-    color: var(--ink-faint);
-    font-size: 12px;
+    color: var(--color-ink-faint);
+    font-size: var(--text-small);
     text-align: center;
     padding: 20px 0;
   }

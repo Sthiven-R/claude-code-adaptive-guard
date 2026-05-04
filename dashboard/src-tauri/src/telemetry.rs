@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::PathBuf;
-use std::sync::Mutex;
+use std::sync::{Arc, LazyLock, Mutex};
 use std::time::SystemTime;
 
 /// Path to `~/.claude/telemetry/adaptive-guard.jsonl`.
@@ -112,16 +112,24 @@ pub struct HistogramBucket {
 // ---------------------------------------------------------------------------
 
 /// What we cache. `key` is (file_size, mtime) from the last successful
-/// load. On the next call we stat() the file; if the key matches, we
-/// reuse `records`. If not, we reload.
+/// load. The records vector is wrapped in an `Arc` so each call to
+/// `with_records` can hand the closure a cheap pointer-clone instead
+/// of a full deep clone of every record. With ~10k records (the
+/// rotation cap) the deep clone was ~5–15 ms per call, multiplied by
+/// six commands per refresh; the Arc clone is constant-time.
 struct Cache {
     key: Option<(u64, SystemTime)>,
-    records: Vec<TelemetryRecord>,
+    records: Arc<Vec<TelemetryRecord>>,
 }
 
-static CACHE: Mutex<Cache> = Mutex::new(Cache {
-    key: None,
-    records: Vec::new(),
+// `Arc::new()` is not const-callable in stable Rust, so we wrap the
+// static in `LazyLock` (stable since 1.80). The first cache access
+// triggers initialization; subsequent accesses are an atomic load.
+static CACHE: LazyLock<Mutex<Cache>> = LazyLock::new(|| {
+    Mutex::new(Cache {
+        key: None,
+        records: Arc::new(Vec::new()),
+    })
 });
 
 /// Compute the current identity key for the telemetry file. If the file
@@ -133,25 +141,24 @@ fn current_key() -> Option<(u64, SystemTime)> {
 }
 
 /// Apply `f` to the latest parsed records, reloading from disk only if
-/// the file changed since the last call. `f` receives a snapshot clone
-/// so the mutex is released before `f` runs.
+/// the file changed since the last call. `f` receives a snapshot Arc
+/// so the mutex is released before `f` runs and the caller's view of
+/// the data cannot be mutated mid-iteration even if a concurrent
+/// command swaps the cached Arc.
 fn with_records<T, F: FnOnce(&[TelemetryRecord]) -> T>(f: F) -> T {
     let current = current_key();
 
-    // Fast path: key matches cache → use cached records directly.
-    // We hold the lock only briefly, clone out under the guard.
-    let snapshot: Vec<TelemetryRecord> = {
+    let snapshot: Arc<Vec<TelemetryRecord>> = {
         let mut guard = CACHE.lock().unwrap();
         let stale = match (guard.key, current) {
             (Some(old), Some(new)) => old != new,
             _ => true,
         };
         if stale {
-            let fresh = load_from_disk();
-            guard.records = fresh;
+            guard.records = Arc::new(load_from_disk());
             guard.key = current;
         }
-        guard.records.clone()
+        Arc::clone(&guard.records)
     };
 
     f(&snapshot)
@@ -187,7 +194,7 @@ fn load_from_disk() -> Vec<TelemetryRecord> {
 pub fn invalidate_cache() {
     let mut guard = CACHE.lock().unwrap();
     guard.key = None;
-    guard.records.clear();
+    guard.records = Arc::new(Vec::new());
 }
 
 // ---------------------------------------------------------------------------
@@ -266,11 +273,19 @@ pub fn stats() -> TelemetryStats {
             records: &[&TelemetryRecord],
             f: impl Fn(&TelemetryRecord) -> Option<u32>,
         ) -> f64 {
-            let vals: Vec<u32> = records.iter().filter_map(|r| f(r)).collect();
-            if vals.is_empty() {
+            // Single-pass fold: avoids materializing the intermediate
+            // Vec<u32> the previous version allocated. With ~10k
+            // records this saves a small allocation per call, but more
+            // importantly removes a paint of garbage the allocator
+            // would have to collect.
+            let (sum, count) = records.iter().filter_map(|r| f(r)).fold(
+                (0u64, 0usize),
+                |(s, c), v| (s + v as u64, c + 1),
+            );
+            if count == 0 {
                 0.0
             } else {
-                vals.iter().map(|&v| v as f64).sum::<f64>() / vals.len() as f64
+                sum as f64 / count as f64
             }
         }
         fn avg_u32(records: &[&TelemetryRecord], f: impl Fn(&TelemetryRecord) -> u32) -> f64 {

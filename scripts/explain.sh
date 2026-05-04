@@ -130,7 +130,9 @@ def print_breakdown(label, score, breakdown, threshold):
     if signals:
         print("  Signals detected:")
         for k, v in signals.items():
-            if k == "tech_tokens":
+            # See stats.sh:179 for the same handling: counts only,
+            # rendered one row per non-zero token type.
+            if k == "tech_token_counts":
                 any_tokens = {kk: vv for kk, vv in v.items() if vv}
                 if any_tokens:
                     for tk, tv in any_tokens.items():

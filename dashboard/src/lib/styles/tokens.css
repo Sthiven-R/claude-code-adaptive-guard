@@ -11,9 +11,10 @@
  * Theme switching: default is dark (set on :root). [data-theme="light"]
  * on <html> overrides the semantic layer. The hue layer stays put.
  *
- * Legacy aliases (--bg, --ink, --accent, ...) are kept at the bottom
- * so existing components keep rendering while we migrate. Remove the
- * alias block once every component reads from --color-* directly.
+ * Light-theme accent / success / danger / alert tokens are NOT the
+ * same hue ramp step as dark — the lighter shades fail WCAG AA on a
+ * #fafafa canvas. Each semantic token in light mode picks the ramp
+ * step that clears 4.5:1 contrast for normal text.
  */
 
 :root {
@@ -47,6 +48,7 @@
   --success-400: #4ade80;
   --success-500: #22c55e;
   --success-600: #16a34a;
+  --success-700: #15803d;
 
   /* ─── Hue: neutral ─────────────────────────────────────────────── */
   --neutral-50:  #fafafa;
@@ -61,7 +63,11 @@
   --neutral-900: #18181b;
   --neutral-950: #09090b;
 
-  /* ─── Semantic: dark theme (default) ───────────────────────────── */
+  /* ─── Semantic: dark theme (default) ─────────────────────────────
+   * Dark canvas is neutral-950; foreground uses neutral-50 → 19:1
+   * contrast (AAA). Accent is cyan-400 → 11:1 (AAA). All ink/
+   * accent/state colors clear AA at any text size in this theme.
+   */
   --color-bg-base:      var(--neutral-950);
   --color-bg-elevated:  var(--neutral-900);
   --color-bg-overlay:   var(--neutral-800);
@@ -75,6 +81,7 @@
   --color-ink-dim:      var(--neutral-400);
   --color-ink-faint:    var(--neutral-500);
   --color-ink-on-accent: var(--neutral-950);
+  --color-ink-soft:     rgba(255, 255, 255, 0.06);
 
   --color-accent:       var(--cyan-400);
   --color-accent-hover: var(--cyan-300);
@@ -89,6 +96,8 @@
 
   --color-success:      var(--success-400);
   --color-success-soft: rgba(74, 222, 128, 0.10);
+
+  --color-overlay-scrim: rgba(0, 0, 0, 0.55);
 
   /* ─── Type ─────────────────────────────────────────────────────── */
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -167,9 +176,16 @@
 }
 
 /* ─── Light theme override ─────────────────────────────────────────
- * Shipping the override now; the toggle UI lands in the dashboard
- * polish task. Reading the override here costs nothing while dark
- * is active because no [data-theme="light"] selector matches.
+ * Each color picked to clear WCAG 2.2 AA (4.5:1) for normal text on
+ * the #fafafa canvas. The dark-mode shades (cyan-400, success-400,
+ * danger-400, alert-500) do not pass — they live in the hue layer
+ * but are deliberately NOT used as text colors in this theme.
+ *
+ * Verified ratios on #fafafa:
+ *   cyan-700  / accent   → 5.13:1 (AA)
+ *   success-700          → 4.88:1 (AA)
+ *   danger-600           → 4.63:1 (AA)
+ *   alert-700            → 5.25:1 (AA)
  */
 [data-theme="light"] {
   --color-bg-base:      var(--neutral-50);
@@ -183,16 +199,24 @@
   --color-ink:          var(--neutral-900);
   --color-ink-dim:      var(--neutral-600);
   --color-ink-faint:    var(--neutral-500);
-  --color-ink-on-accent: var(--neutral-950);
+  --color-ink-on-accent: var(--neutral-50);
+  --color-ink-soft:     rgba(0, 0, 0, 0.06);
 
-  --color-accent:       var(--cyan-600);
-  --color-accent-hover: var(--cyan-700);
+  --color-accent:       var(--cyan-700);
+  --color-accent-hover: var(--cyan-800);
   --color-accent-dim:   rgba(8, 145, 178, 0.10);
   --color-accent-glow:  rgba(34, 211, 238, 0.20);
 
-  --color-alert-soft:   rgba(249, 115, 22, 0.08);
+  --color-alert:        var(--alert-700);
+  --color-alert-soft:   rgba(194, 65, 12, 0.08);
+
+  --color-danger:       var(--danger-600);
   --color-danger-soft:  rgba(220, 38, 38, 0.08);
-  --color-success-soft: rgba(34, 197, 94, 0.08);
+
+  --color-success:      var(--success-700);
+  --color-success-soft: rgba(21, 128, 61, 0.08);
+
+  --color-overlay-scrim: rgba(15, 15, 15, 0.35);
 
   --elevation-1: 0 1px 2px rgba(15, 15, 15, 0.06);
   --elevation-2: 0 4px 12px rgba(15, 15, 15, 0.08),
@@ -215,26 +239,4 @@
     --duration-slow:    1ms;
     --duration-slower:  1ms;
   }
-}
-
-/* ─── Legacy aliases ──────────────────────────────────────────────
- * Maps the pre-Sprint-3 token names to the new semantic tokens so
- * unmigrated components keep rendering. Removed at the end of the
- * dashboard polish task once every component has been updated.
- */
-:root {
-  --bg:        var(--color-bg-base);
-  --bg-soft:   var(--color-bg-elevated);
-  --bg-hard:   var(--color-bg-base);
-  --border:    var(--color-border);
-  --ink:       var(--color-ink);
-  --ink-dim:   var(--color-ink-dim);
-  --ink-faint: var(--color-ink-faint);
-  --accent:     var(--color-accent);
-  --accent-dim: var(--color-accent-dim);
-  --ok:     var(--color-success);
-  --warn:   var(--color-alert);
-  --danger: var(--color-danger);
-  --mono: var(--font-mono);
-  --sans: var(--font-sans);
 }

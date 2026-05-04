@@ -48,7 +48,7 @@
     -->
     <path
       d="M 25.53 11.5 A 11 11 0 1 0 21.5 25.53"
-      stroke="var(--color-accent, #22d3ee)"
+      stroke="var(--color-accent)"
       stroke-width="2.5"
       stroke-linecap="round"
     />
@@ -59,7 +59,7 @@
     -->
     <path
       d="M 7 17 L 11.5 17 L 13.5 13 L 17 21 L 19 17 L 25 17"
-      stroke="var(--color-accent, #22d3ee)"
+      stroke="var(--color-accent)"
       stroke-width="2.25"
       stroke-linecap="round"
       stroke-linejoin="round"
@@ -80,19 +80,22 @@
   }
 
   .ag-wordmark {
-    font-family: var(--font-mono, ui-monospace, monospace);
-    font-weight: var(--weight-semibold, 600);
+    /* Tokens are loaded synchronously by main.ts before any component
+     * mounts (see main.ts ordering); inline fallbacks are theatre that
+     * misrepresent the light-theme value. Trust the token. */
+    font-family: var(--font-mono);
+    font-weight: var(--weight-semibold);
     font-size: 0.95em;
-    letter-spacing: var(--tracking-tight, -0.01em);
-    color: var(--color-ink, #fafafa);
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-ink);
     display: inline-block;
     vertical-align: middle;
     margin-left: 0.4em;
   }
 
   .ag-mid-dot {
-    color: var(--color-accent, #22d3ee);
+    color: var(--color-accent);
     margin: 0 0.05em;
-    font-weight: var(--weight-bold, 700);
+    font-weight: var(--weight-bold);
   }
 </style>

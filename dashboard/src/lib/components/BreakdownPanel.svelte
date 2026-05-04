@@ -78,12 +78,21 @@
       <div class="section-label">{$t.breakdown.signals_section}</div>
       <ul class="signals">
         {#each nonEmptySignals as [key, value]}
-          {#if key === "tech_tokens" && value && typeof value === "object"}
+          {#if key === "tech_token_counts" && value && typeof value === "object"}
+            <!--
+              Backend (hooks/lib/structural.py:160) writes counts only:
+              { "camelCase": 3, "snake_case": 1, ... }. We render each
+              non-zero entry as its own row "tech.<name>: <count>".
+              Privacy: the backend is forbidden from writing matched
+              substrings here — only counts. If a future contributor
+              changes that contract, the type guard below limits the
+              breakage (only numeric values land in the DOM).
+            -->
             {#each Object.entries(value as Record<string, unknown>) as [tkey, tval]}
-              {#if Array.isArray(tval) && tval.length > 0}
+              {#if typeof tval === "number" && tval > 0}
                 <li>
                   <span class="sig-name">tech.{tkey}</span>
-                  <span class="sig-value">{formatValue(tval)}</span>
+                  <span class="sig-value">{tval}</span>
                 </li>
               {/if}
             {/each}
@@ -101,9 +110,9 @@
 
 <style>
   .breakdown {
-    background: var(--bg-hard);
-    border: 1px solid var(--border);
-    border-radius: 6px;
+    background: var(--color-bg-base);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
     padding: 10px 12px;
   }
 
@@ -114,41 +123,41 @@
     margin-bottom: 6px;
   }
   .label {
-    font-size: 11px;
+    font-size: var(--text-micro);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--ink-dim);
-    font-weight: 600;
+    letter-spacing: var(--tracking-wider);
+    color: var(--color-ink-dim);
+    font-weight: var(--weight-semibold);
   }
   .total {
-    font-family: var(--mono);
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-body);
+    font-weight: var(--weight-semibold);
+    color: var(--color-accent);
   }
 
   .sub-line {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--ink-dim);
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-small);
+    color: var(--color-ink-dim);
     margin-bottom: 8px;
   }
   .sub-line strong {
-    color: var(--ink);
+    color: var(--color-ink);
   }
 
   .muted {
-    color: var(--ink-faint);
-    font-size: 12px;
+    color: var(--color-ink-faint);
+    font-size: var(--text-small);
     padding: 4px 0;
   }
 
   .section-label {
     margin: 10px 0 4px;
-    font-size: 10px;
+    font-size: var(--text-mono-micro);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--ink-faint);
+    letter-spacing: var(--tracking-wider);
+    color: var(--color-ink-faint);
   }
 
   ul {
@@ -164,10 +173,10 @@
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    font-family: var(--mono);
-    font-size: 12px;
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
     padding: 2px 0;
-    border-bottom: 1px dotted var(--border);
+    border-bottom: 1px dotted var(--color-border);
     gap: 12px;
   }
   li:last-child {
@@ -176,14 +185,14 @@
 
   .axis-name,
   .sig-name {
-    color: var(--ink-dim);
+    color: var(--color-ink-dim);
   }
   .axis-pts {
-    color: var(--ink);
-    font-weight: 500;
+    color: var(--color-ink);
+    font-weight: var(--weight-medium);
   }
   .sig-value {
-    color: var(--ink);
+    color: var(--color-ink);
     word-break: break-all;
     text-align: right;
   }

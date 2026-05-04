@@ -51,6 +51,26 @@
   let now: Date = $state(new Date());
   let nowTimer: ReturnType<typeof setInterval> | null = null;
 
+  // Stable per-record id, assigned the first time we see a (ts, session_id,
+  // complexity, depth, decision, missing_count) combination. Used as the
+  // {#each} key so prepending new records does NOT shift indices and
+  // remount every existing DecisionCard. The map grows monotonically
+  // but is bounded by the backend's 10k-record rotation.
+  let nextRecordId = 1;
+  const recordIdMap = new Map<string, number>();
+  function recordKey(r: TelemetryRecord): string {
+    return `${r.ts}|${r.session_id}|${r.complexity ?? "x"}|${r.depth ?? "x"}|${r.decision}|${r.missing_count}`;
+  }
+  function recordId(r: TelemetryRecord): number {
+    const k = recordKey(r);
+    let id = recordIdMap.get(k);
+    if (id === undefined) {
+      id = nextRecordId++;
+      recordIdMap.set(k, id);
+    }
+    return id;
+  }
+
   const activeProfile = $derived(recent[recent.length - 1]?.profile ?? "balanced");
   const complexityThreshold = $derived<number | null>(
     recent[recent.length - 1]?.thresholds?.complexity_min_score ?? 40
@@ -59,8 +79,10 @@
     recent[recent.length - 1]?.thresholds?.depth_min_score ?? 40
   );
 
+  // Reverse once into a stable array; filtering does not change order.
+  // Recomputed when `recent` or `filters` change.
   const displayRecords = $derived(
-    applyFilters([...recent].reverse(), filters)
+    applyFilters(recent.slice().reverse(), filters)
   );
 
   // Welcome shows on a fresh install: no hook, no telemetry, not skipped.
@@ -250,12 +272,13 @@
     {:else}
       <div class="list">
         <!--
-          Key includes array index because ts+session_id can collide
-          when two Stop events fire within the same second in the same
-          session. Adding the index disambiguates cleanly without
-          needing a schema change to add a sequence number.
+          Key uses a stable per-record id (assigned by `recordId()` the
+          first time a record is seen). Without this, prepending new
+          records would shift the array index and force every existing
+          DecisionCard to remount on every refresh, retriggering the
+          slide-down animation and tearing down BreakdownPanel children.
         -->
-        {#each displayRecords as r, i (r.ts + "|" + r.session_id + "|" + i)}
+        {#each displayRecords as r (recordId(r))}
           <DecisionCard record={r} {now} />
         {/each}
       </div>
@@ -330,7 +353,7 @@
   .inline-link {
     background: none;
     border: none;
-    color: var(--accent);
+    color: var(--color-accent);
     text-decoration: underline;
     cursor: pointer;
     padding: 0;
@@ -341,44 +364,44 @@
   }
 
   .error {
-    background: rgba(248, 113, 113, 0.1);
-    border: 1px solid var(--danger);
-    color: var(--danger);
+    background: var(--color-danger-soft);
+    border: 1px solid var(--color-danger);
+    color: var(--color-danger);
     padding: 10px 14px;
-    border-radius: 6px;
-    margin-bottom: 16px;
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-4);
   }
 
   .warn {
-    background: rgba(251, 191, 36, 0.06);
-    border: 1px solid var(--warn);
-    color: var(--ink);
+    background: var(--color-alert-soft);
+    border: 1px solid var(--color-alert);
+    color: var(--color-ink);
     padding: 14px 18px;
-    border-radius: 8px;
-    margin-bottom: 20px;
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-5);
   }
   .warn strong {
-    color: var(--warn);
+    color: var(--color-alert);
   }
   .warn .sub {
-    color: var(--ink-dim);
-    font-size: 13px;
+    color: var(--color-ink-dim);
+    font-size: var(--text-mono-body);
     margin-top: 4px;
-    line-height: 1.5;
+    line-height: var(--leading-normal);
   }
   .warn .sub code {
-    background: var(--bg-hard);
+    background: var(--color-bg-base);
     padding: 1px 6px;
-    border-radius: 3px;
-    color: var(--accent);
+    border-radius: var(--radius-xs);
+    color: var(--color-accent);
   }
   .warn .path-info {
     margin-top: 8px;
-    font-size: 12px;
-    color: var(--ink-faint);
+    font-size: var(--text-small);
+    color: var(--color-ink-faint);
   }
   .warn .path-info code {
-    color: var(--ink-dim);
+    color: var(--color-ink-dim);
     background: none;
     padding: 0;
   }
@@ -386,8 +409,8 @@
   .charts {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin-bottom: 14px;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
   }
   @media (max-width: 900px) {
     .charts {
@@ -396,24 +419,24 @@
   }
 
   .recent-section {
-    margin-bottom: 20px;
+    margin-bottom: var(--space-5);
   }
 
   .section-head {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: var(--space-3);
     flex-wrap: wrap;
     gap: 10px;
   }
   h2 {
     margin: 0;
-    font-size: 12px;
+    font-size: var(--text-small);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--ink-dim);
-    font-weight: 600;
+    letter-spacing: var(--tracking-widest);
+    color: var(--color-ink-dim);
+    font-weight: var(--weight-semibold);
     display: flex;
     align-items: center;
     gap: 10px;
@@ -426,9 +449,9 @@
   }
 
   .count {
-    font-size: 11px;
-    color: var(--ink-faint);
-    font-family: var(--mono);
+    font-size: var(--text-mono-small);
+    color: var(--color-ink-faint);
+    font-family: var(--font-mono);
   }
   .count .of {
     opacity: 0.7;
@@ -436,18 +459,20 @@
   }
 
   button {
-    background: var(--bg-soft);
-    border: 1px solid var(--border);
-    color: var(--ink);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    color: var(--color-ink);
     padding: 5px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    transition: all 0.15s ease;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-small);
+    transition: background var(--duration-fast) var(--ease-standard),
+                border-color var(--duration-fast) var(--ease-standard),
+                color var(--duration-fast) var(--ease-standard);
   }
   button:hover:not(:disabled) {
-    background: var(--accent-dim);
-    border-color: var(--accent);
-    color: var(--ink);
+    background: var(--color-accent-dim);
+    border-color: var(--color-accent);
+    color: var(--color-ink);
   }
   button:disabled {
     opacity: 0.5;
@@ -477,17 +502,17 @@
   .load-more {
     display: flex;
     justify-content: center;
-    padding: 14px 0;
+    padding: var(--space-3) 0;
   }
 
   footer {
     display: flex;
     justify-content: center;
     gap: 10px;
-    padding: 20px 0 8px;
-    color: var(--ink-faint);
-    font-family: var(--mono);
-    font-size: 11px;
+    padding: var(--space-5) 0 var(--space-2);
+    color: var(--color-ink-faint);
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-small);
     flex-wrap: wrap;
   }
   footer .sep {

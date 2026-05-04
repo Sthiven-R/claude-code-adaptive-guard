@@ -25,6 +25,25 @@ GitHub's social-preview uploader requires PNG. Pick one of:
 Upload the resulting PNG at: GitHub → Settings → General → Social
 preview → Edit.
 
+### Font fallback during conversion
+
+`social-preview.svg` references **Inter** (sans) and **JetBrains Mono**
+for the wordmark. The renderer that converts the SVG to PNG looks for
+those fonts in the host system; if they are missing, it silently
+falls back to the next family in the SVG `font-family` chain
+(`ui-monospace, monospace` for the wordmark, `system-ui, sans-serif`
+for the tagline). The fallback PNG is still readable, but the
+wordmark loses its custom letter-spacing and the visual weight shifts.
+
+For brand-perfect output, install both fonts before converting:
+
+- **Inter**: <https://rsms.me/inter/> (TTF/OTF download).
+- **JetBrains Mono**: <https://www.jetbrains.com/lp/mono/> (TTF download).
+
+Figma users: install once on the OS, then "Re-link missing fonts"
+in the Figma file. ImageMagick / Inkscape pick up system fonts
+automatically once they are installed.
+
 ## Replacing the provisional dashboard hero
 
 The current `dashboard-hero.svg` is a hand-drawn mock that

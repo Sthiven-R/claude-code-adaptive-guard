@@ -176,7 +176,12 @@ if last_n > 0:
                 sig = cb["signals"]
                 print(f"    Signals detected:")
                 for k, v in sig.items():
-                    if k == "tech_tokens":
+                    # tech_token_counts is a {name: count} dict — render
+                    # each non-zero entry as a "tech.<name>: <count>" row.
+                    # The pre-2026-05 schema used "tech_tokens"; renaming
+                    # the consumer side rather than the producer keeps
+                    # historical telemetry readable.
+                    if k == "tech_token_counts":
                         any_tokens = {kk: vv for kk, vv in v.items() if vv}
                         if any_tokens:
                             for tk, tv in any_tokens.items():

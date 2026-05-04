@@ -98,10 +98,10 @@
     gap: 14px;
     align-items: center;
     padding: 10px 14px;
-    background: var(--bg-soft);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    margin-bottom: 14px;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-3);
   }
 
   .group {
@@ -115,54 +115,57 @@
   }
 
   .label {
-    font-size: 10px;
+    font-size: var(--text-mono-micro);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--ink-faint);
+    letter-spacing: var(--tracking-widest);
+    color: var(--color-ink-faint);
     margin-right: 4px;
   }
 
   .chip {
     background: transparent;
-    border: 1px solid var(--border);
-    color: var(--ink-dim);
+    border: 1px solid var(--color-border);
+    color: var(--color-ink-dim);
     padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-family: var(--mono);
-    letter-spacing: 0.05em;
+    border-radius: var(--radius-lg);
+    font-size: var(--text-micro);
+    font-family: var(--font-mono);
+    letter-spacing: var(--tracking-wide);
     text-transform: uppercase;
+    transition: color var(--duration-fast) var(--ease-standard),
+                border-color var(--duration-fast) var(--ease-standard),
+                background var(--duration-fast) var(--ease-standard);
   }
   .chip:hover:not(.active) {
-    color: var(--ink);
-    border-color: var(--accent-dim);
+    color: var(--color-ink);
+    border-color: var(--color-accent-dim);
   }
 
   .chip.block.active {
-    background: rgba(248, 113, 113, 0.15);
-    border-color: var(--danger);
-    color: var(--danger);
+    background: var(--color-danger-soft);
+    border-color: var(--color-danger);
+    color: var(--color-danger);
   }
   .chip.deep.active {
-    background: rgba(134, 239, 172, 0.15);
-    border-color: var(--ok);
-    color: var(--ok);
+    background: var(--color-success-soft);
+    border-color: var(--color-success);
+    color: var(--color-success);
   }
   .chip.simple.active {
-    background: rgba(154, 154, 160, 0.15);
-    border-color: var(--ink-dim);
-    color: var(--ink-dim);
+    background: var(--color-ink-soft);
+    border-color: var(--color-ink-dim);
+    color: var(--color-ink-dim);
   }
 
   select,
   input[type="text"] {
-    background: var(--bg-hard);
-    border: 1px solid var(--border);
-    color: var(--ink);
+    background: var(--color-bg-base);
+    border: 1px solid var(--color-border);
+    color: var(--color-ink);
     padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-family: var(--mono);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-small);
+    font-family: var(--font-mono);
   }
   select {
     min-width: 120px;
@@ -173,15 +176,17 @@
   }
 
   .clear {
-    background: var(--bg-hard);
-    border: 1px solid var(--border);
-    color: var(--ink-dim);
+    background: var(--color-bg-base);
+    border: 1px solid var(--color-border);
+    color: var(--color-ink-dim);
     padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 11px;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-micro);
+    transition: color var(--duration-fast) var(--ease-standard),
+                border-color var(--duration-fast) var(--ease-standard);
   }
   .clear:hover {
-    color: var(--ink);
-    border-color: var(--accent);
+    color: var(--color-ink);
+    border-color: var(--color-accent);
   }
 </style>

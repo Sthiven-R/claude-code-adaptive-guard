@@ -9,15 +9,19 @@
 
   let expanded = $state(false);
 
-  // Maps the raw `decision` string to the visual class. Label text is
-  // resolved reactively in the template via `$t.decision` so the badge
+  // Maps the raw `decision` string to the visual class. The returned
+  // `color` value is interpolated into an inline `style=` attribute
+  // below; for that reason it MUST be a hardcoded literal here. Never
+  // build it from `record.*` fields or any other user-controlled data
+  // — that would turn this site into a CSS-injection foothold.
+  // Label text is resolved reactively via `$t.decision` so the badge
   // changes language without re-rendering the whole list.
   function decisionStyle(d: string): { color: string; cls: string } {
-    if (d === "block") return { color: "var(--danger)", cls: "block" };
-    if (d === "allow_deep_response") return { color: "var(--ok)", cls: "deep" };
+    if (d === "block") return { color: "var(--color-danger)", cls: "block" };
+    if (d === "allow_deep_response") return { color: "var(--color-success)", cls: "deep" };
     if (d === "allow_simple_task")
-      return { color: "var(--ink-faint)", cls: "simple" };
-    return { color: "var(--ink-dim)", cls: "other" };
+      return { color: "var(--color-ink-faint)", cls: "simple" };
+    return { color: "var(--color-ink-dim)", cls: "other" };
   }
 
   const style = $derived(decisionStyle(record.decision));
@@ -179,22 +183,22 @@
   .tag {
     display: inline-block;
     padding: 2px 10px;
-    border-radius: 4px;
+    border-radius: var(--radius-xs);
     border: 1px solid;
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-micro);
+    letter-spacing: var(--tracking-widest);
+    font-weight: var(--weight-semibold);
   }
 
   .time .primary {
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-body);
+    color: var(--color-ink);
   }
   .time .secondary {
-    font-size: 11px;
-    color: var(--ink-faint);
+    font-size: var(--text-micro);
+    color: var(--color-ink-faint);
   }
 
   .scores {
@@ -205,17 +209,17 @@
     display: inline-flex;
     align-items: baseline;
     gap: 4px;
-    font-family: var(--mono);
+    font-family: var(--font-mono);
   }
   .score-label {
-    font-size: 10px;
-    color: var(--ink-faint);
+    font-size: var(--text-mono-micro);
+    color: var(--color-ink-faint);
     text-transform: uppercase;
   }
   .score-value {
     font-size: 15px;
-    font-weight: 600;
-    color: var(--ink);
+    font-weight: var(--weight-semibold);
+    color: var(--color-ink);
     min-width: 24px;
     text-align: right;
   }
@@ -225,17 +229,17 @@
     gap: 10px;
     justify-content: flex-end;
     align-items: center;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-small);
+    color: var(--color-ink-faint);
   }
   .session {
-    background: var(--bg-hard);
+    background: var(--color-bg-base);
     padding: 2px 6px;
-    border-radius: 3px;
+    border-radius: var(--radius-xs);
   }
   .missing {
-    color: var(--warn);
+    color: var(--color-alert);
   }
 
   .chev {
@@ -251,8 +255,8 @@
 
   .details {
     padding: 0 14px 14px;
-    border-top: 1px solid var(--border);
-    animation: slide-down 0.18s ease;
+    border-top: 1px solid var(--color-border);
+    animation: slide-down var(--duration-base) var(--ease-out-quart);
   }
 
   @keyframes slide-down {
@@ -271,15 +275,15 @@
     flex-wrap: wrap;
     gap: 10px 18px;
     padding: 12px 0 10px;
-    font-size: 12px;
-    color: var(--ink-dim);
-    font-family: var(--mono);
+    font-size: var(--text-small);
+    color: var(--color-ink-dim);
+    font-family: var(--font-mono);
   }
   .info-row code {
-    color: var(--ink);
-    background: var(--bg-hard);
+    color: var(--color-ink);
+    background: var(--color-bg-base);
     padding: 1px 5px;
-    border-radius: 3px;
+    border-radius: var(--radius-xs);
   }
 
   .breakdown-grid {
@@ -296,23 +300,23 @@
   .missing-section {
     margin-top: 12px;
     padding: 10px 12px;
-    background: rgba(251, 191, 36, 0.06);
-    border: 1px solid var(--warn);
-    border-radius: 6px;
+    background: var(--color-alert-soft);
+    border: 1px solid var(--color-alert);
+    border-radius: var(--radius-sm);
   }
   .missing-head {
-    font-size: 11px;
+    font-size: var(--text-micro);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--warn);
+    letter-spacing: var(--tracking-wider);
+    color: var(--color-alert);
     margin-bottom: 6px;
-    font-weight: 600;
+    font-weight: var(--weight-semibold);
   }
   .missing-section ul {
     margin: 0;
     padding-left: 18px;
-    font-size: 13px;
-    color: var(--ink);
+    font-size: var(--text-mono-body);
+    color: var(--color-ink);
   }
   .missing-section li {
     margin-bottom: 3px;

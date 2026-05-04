@@ -236,7 +236,7 @@
   .backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.55);
+    background: var(--color-overlay-scrim);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -244,14 +244,15 @@
     padding: 20px;
   }
   .modal {
-    background: var(--bg-soft);
-    border: 1px solid var(--border);
-    border-radius: 12px;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
     width: 100%;
     max-width: 560px;
     max-height: 88vh;
     overflow-y: auto;
     padding: 18px 22px 16px;
+    box-shadow: var(--elevation-3);
   }
 
   header {
@@ -259,33 +260,33 @@
     justify-content: space-between;
     align-items: center;
     padding-bottom: 12px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--color-border);
     margin-bottom: 14px;
   }
   h2 {
     margin: 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--ink);
+    font-size: var(--text-body);
+    font-weight: var(--weight-semibold);
+    color: var(--color-ink);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: var(--tracking-wider);
   }
   .close {
     background: none;
     border: none;
-    color: var(--ink-faint);
-    font-size: 22px;
+    color: var(--color-ink-faint);
     line-height: 1;
     cursor: pointer;
     padding: 0 6px;
+    transition: color var(--duration-fast) var(--ease-standard);
   }
   .close:hover {
-    color: var(--ink);
+    color: var(--color-ink);
   }
 
   section {
     padding: 8px 0 12px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--color-border);
     margin-bottom: 12px;
   }
   section:last-of-type {
@@ -293,11 +294,11 @@
   }
   h3 {
     margin: 0 0 10px;
-    font-size: 11px;
+    font-size: var(--text-micro);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--ink-faint);
-    font-weight: 600;
+    letter-spacing: var(--tracking-wider);
+    color: var(--color-ink-faint);
+    font-weight: var(--weight-semibold);
   }
 
   .row {
@@ -305,14 +306,14 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 12px;
-    font-size: 12px;
+    font-size: var(--text-small);
   }
   .row .label {
-    color: var(--ink-dim);
+    color: var(--color-ink-dim);
   }
   .row .value {
-    font-family: var(--mono);
-    color: var(--ink);
+    font-family: var(--font-mono);
+    color: var(--color-ink);
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -321,79 +322,82 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--ink-faint);
+    background: var(--color-ink-faint);
   }
   .dot.on {
-    background: var(--ok);
-    box-shadow: 0 0 6px var(--ok);
+    background: var(--color-success);
+    box-shadow: 0 0 6px var(--color-success);
   }
   .dot.off {
-    background: var(--ink-faint);
+    background: var(--color-ink-faint);
   }
 
   button {
     font-family: inherit;
-    font-size: 12px;
+    font-size: var(--text-small);
     padding: 6px 14px;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: opacity 0.15s ease;
+    transition: opacity var(--duration-fast) var(--ease-standard),
+                background var(--duration-fast) var(--ease-standard),
+                border-color var(--duration-fast) var(--ease-standard),
+                color var(--duration-fast) var(--ease-standard);
   }
   button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
   button.primary {
-    background: var(--accent);
+    background: var(--color-accent);
     border: none;
-    color: var(--bg);
-    font-weight: 600;
+    color: var(--color-ink-on-accent);
+    font-weight: var(--weight-semibold);
   }
   button.primary:hover:not(:disabled) {
     opacity: 0.85;
   }
   button.ghost {
-    background: var(--bg-hard);
-    border: 1px solid var(--border);
-    color: var(--ink);
+    background: var(--color-bg-base);
+    border: 1px solid var(--color-border);
+    color: var(--color-ink);
   }
   button.ghost:hover:not(:disabled) {
-    border-color: var(--ink-dim);
+    border-color: var(--color-ink-dim);
   }
   button.ghost.danger-text {
-    color: var(--danger);
+    color: var(--color-danger);
   }
   button.ghost.danger-text:hover:not(:disabled) {
-    border-color: var(--danger);
+    border-color: var(--color-danger);
   }
   button.danger {
-    background: var(--danger);
+    background: var(--color-danger);
     border: none;
-    color: var(--bg);
-    font-weight: 600;
+    color: var(--color-ink-on-accent);
+    font-weight: var(--weight-semibold);
   }
   button.danger:hover:not(:disabled) {
     opacity: 0.85;
   }
 
   .confirm {
-    background: rgba(248, 113, 113, 0.06);
-    border: 1px solid var(--danger);
-    border-radius: 6px;
+    background: var(--color-danger-soft);
+    border: 1px solid var(--color-danger);
+    border-radius: var(--radius-sm);
     padding: 10px 12px;
-    font-size: 12px;
+    font-size: var(--text-small);
   }
   .confirm p {
     margin: 0 0 10px;
-    color: var(--ink);
-    line-height: 1.5;
+    color: var(--color-ink);
+    line-height: var(--leading-normal);
   }
   .confirm code {
-    background: var(--bg-hard);
+    background: var(--color-bg-base);
     padding: 1px 5px;
-    border-radius: 3px;
-    color: var(--accent);
-    font-size: 11px;
+    border-radius: var(--radius-xs);
+    color: var(--color-accent);
+    font-size: var(--text-mono-small);
     word-break: break-all;
   }
   .confirm-actions {
@@ -406,77 +410,77 @@
     grid-template-columns: 80px 1fr;
     gap: 12px;
     align-items: baseline;
-    font-size: 11px;
+    font-size: var(--text-mono-small);
     margin-bottom: 6px;
   }
   .kv .k {
-    color: var(--ink-faint);
-    font-family: var(--mono);
+    color: var(--color-ink-faint);
+    font-family: var(--font-mono);
   }
   .kv .v code {
-    color: var(--ink);
+    color: var(--color-ink);
     background: none;
     padding: 0;
-    font-family: var(--mono);
+    font-family: var(--font-mono);
     word-break: break-all;
   }
 
   .error {
     margin-top: 10px;
     padding: 10px 12px;
-    border-radius: 6px;
-    background: rgba(248, 113, 113, 0.06);
-    border: 1px solid var(--danger);
-    font-size: 12px;
-    line-height: 1.5;
+    border-radius: var(--radius-sm);
+    background: var(--color-danger-soft);
+    border: 1px solid var(--color-danger);
+    font-size: var(--text-small);
+    line-height: var(--leading-normal);
   }
   .error strong {
-    color: var(--danger);
+    color: var(--color-danger);
     display: block;
     margin-bottom: 4px;
   }
   .error code {
-    background: var(--bg-hard);
+    background: var(--color-bg-base);
     padding: 1px 5px;
-    border-radius: 3px;
-    color: var(--ink-dim);
-    font-size: 11px;
+    border-radius: var(--radius-xs);
+    color: var(--color-ink-dim);
+    font-size: var(--text-mono-small);
     word-break: break-all;
   }
 
   .result {
     margin-top: 10px;
     padding: 10px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    line-height: 1.5;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-small);
+    line-height: var(--leading-normal);
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
   .result.ok {
-    background: rgba(134, 239, 172, 0.06);
-    border: 1px solid var(--ok);
-    color: var(--ink);
+    background: var(--color-success-soft);
+    border: 1px solid var(--color-success);
+    color: var(--color-ink);
   }
   .result.err {
-    background: rgba(248, 113, 113, 0.06);
-    border: 1px solid var(--danger);
-    color: var(--ink);
+    background: var(--color-danger-soft);
+    border: 1px solid var(--color-danger);
+    color: var(--color-ink);
   }
   .result strong {
-    color: var(--ink);
+    color: var(--color-ink);
   }
   .result .backup {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-micro);
+    color: var(--color-ink-faint);
     word-break: break-all;
   }
   .result code {
     background: none;
     padding: 0;
-    color: var(--ink-faint);
+    color: var(--color-ink-faint);
   }
 
   .seg-toggle {
@@ -512,9 +516,9 @@
 
   footer {
     text-align: center;
-    color: var(--ink-faint);
-    font-family: var(--mono);
-    font-size: 10px;
+    color: var(--color-ink-faint);
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-micro);
     padding-top: 8px;
   }
 </style>

@@ -26,8 +26,8 @@
     variant === "circle"
       ? "50%"
       : variant === "block"
-        ? "var(--radius-md, 8px)"
-        : "var(--radius-sm, 6px)"
+        ? "var(--radius-md)"
+        : "var(--radius-sm)"
   );
 </script>
 
@@ -40,11 +40,13 @@
 <style>
   .skeleton {
     display: inline-block;
+    /* Same rationale as Logo.svelte: tokens are loaded synchronously,
+     * so the inline hex fallbacks were misleading in light theme. */
     background: linear-gradient(
       90deg,
-      var(--color-bg-elevated, #18181b) 0%,
-      var(--color-bg-overlay, #27272a) 50%,
-      var(--color-bg-elevated, #18181b) 100%
+      var(--color-bg-elevated) 0%,
+      var(--color-bg-overlay) 50%,
+      var(--color-bg-elevated) 100%
     );
     background-size: 200% 100%;
     animation: shimmer 1.4s ease-in-out infinite;
@@ -63,7 +65,7 @@
   @media (prefers-reduced-motion: reduce) {
     .skeleton {
       animation: none;
-      background: var(--color-bg-elevated, #18181b);
+      background: var(--color-bg-elevated);
     }
   }
 </style>

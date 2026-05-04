@@ -66,9 +66,10 @@ const initialMode = readStored();
 export const themeMode = writable<ThemeMode>(initialMode);
 export const themeApplied = writable<ThemeApplied>(resolve(initialMode));
 
-// Apply once at module load so the very first paint is correct.
-apply(resolve(initialMode));
-
+// `writable.subscribe` fires synchronously with the current value at
+// subscription time, so the apply() inside this subscriber runs on
+// module load with the resolved initial mode. No need for a separate
+// eager apply() — it would just be a duplicate (idempotent) call.
 themeMode.subscribe((mode) => {
   persist(mode);
   const applied = resolve(mode);

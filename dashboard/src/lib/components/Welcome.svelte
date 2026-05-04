@@ -123,9 +123,10 @@
     max-width: 720px;
     margin: 40px auto;
     padding: 28px 32px 24px;
-    background: var(--bg-soft);
-    border: 1px solid var(--border);
-    border-radius: 12px;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--elevation-1);
   }
 
   header {
@@ -147,9 +148,9 @@
   }
 
   .lede {
-    color: var(--ink-dim);
-    font-size: 13px;
-    line-height: 1.6;
+    color: var(--color-ink-dim);
+    font-size: var(--text-mono-body);
+    line-height: var(--leading-relaxed);
     margin: 0 0 24px;
   }
 
@@ -165,30 +166,32 @@
     display: flex;
     gap: 16px;
     padding: 14px 16px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--bg-hard);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-base);
+    transition: border-color var(--duration-base) var(--ease-standard),
+                background var(--duration-base) var(--ease-standard);
   }
   .step.active {
-    border-color: var(--accent);
-    background: rgba(94, 234, 212, 0.04);
+    border-color: var(--color-accent);
+    background: var(--color-accent-dim);
   }
   .step .num {
     flex: 0 0 28px;
     height: 28px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    color: var(--ink-faint);
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-border);
+    color: var(--color-ink-faint);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: var(--mono);
-    font-size: 12px;
-    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+    font-weight: var(--weight-semibold);
   }
   .step.active .num {
-    border-color: var(--accent);
-    color: var(--accent);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
   }
   .step .body {
     flex: 1;
@@ -196,34 +199,34 @@
   }
   .step h2 {
     margin: 0 0 4px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--ink);
+    font-size: var(--text-mono-body);
+    font-weight: var(--weight-semibold);
+    color: var(--color-ink);
   }
   .step p {
     margin: 0 0 10px;
-    font-size: 12px;
-    line-height: 1.5;
-    color: var(--ink-dim);
+    font-size: var(--text-small);
+    line-height: var(--leading-normal);
+    color: var(--color-ink-dim);
   }
   .step code {
-    background: var(--bg-soft);
+    background: var(--color-bg-elevated);
     padding: 1px 6px;
-    border-radius: 3px;
-    font-size: 11px;
-    color: var(--accent);
+    border-radius: var(--radius-xs);
+    font-size: var(--text-micro);
+    color: var(--color-accent);
   }
 
   button.primary {
-    background: var(--accent);
+    background: var(--color-accent);
     border: none;
-    color: var(--bg);
-    font-weight: 600;
-    font-size: 13px;
+    color: var(--color-ink-on-accent);
+    font-weight: var(--weight-semibold);
+    font-size: var(--text-mono-body);
     padding: 8px 16px;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: opacity 0.15s ease;
+    transition: opacity var(--duration-fast) var(--ease-standard);
   }
   button.primary:hover:not(:disabled) {
     opacity: 0.85;
@@ -236,65 +239,65 @@
   .result {
     margin-top: 12px;
     padding: 10px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    line-height: 1.5;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-small);
+    line-height: var(--leading-normal);
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
   .result.ok {
-    background: rgba(134, 239, 172, 0.08);
-    border: 1px solid var(--ok);
-    color: var(--ink);
+    background: var(--color-success-soft);
+    border: 1px solid var(--color-success);
+    color: var(--color-ink);
   }
   .result.err {
-    background: rgba(248, 113, 113, 0.08);
-    border: 1px solid var(--danger);
-    color: var(--ink);
+    background: var(--color-danger-soft);
+    border: 1px solid var(--color-danger);
+    color: var(--color-ink);
   }
   .result strong {
-    color: var(--ink);
+    color: var(--color-ink);
   }
   .result .backup {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-micro);
+    color: var(--color-ink-faint);
     word-break: break-all;
   }
   .result code {
     background: none;
     padding: 0;
-    color: var(--ink-faint);
+    color: var(--color-ink-faint);
   }
 
   .error {
     margin-top: 8px;
     padding: 10px 12px;
-    border-radius: 6px;
-    background: rgba(248, 113, 113, 0.06);
-    border: 1px solid var(--danger);
-    color: var(--ink);
-    font-size: 12px;
-    line-height: 1.5;
+    border-radius: var(--radius-sm);
+    background: var(--color-danger-soft);
+    border: 1px solid var(--color-danger);
+    color: var(--color-ink);
+    font-size: var(--text-small);
+    line-height: var(--leading-normal);
   }
   .error strong {
-    color: var(--danger);
+    color: var(--color-danger);
     display: block;
     margin-bottom: 4px;
   }
   .error code {
-    background: var(--bg-soft);
+    background: var(--color-bg-elevated);
     padding: 1px 6px;
-    border-radius: 3px;
-    font-size: 11px;
-    color: var(--ink-dim);
+    border-radius: var(--radius-xs);
+    font-size: var(--text-micro);
+    color: var(--color-ink-dim);
     word-break: break-all;
   }
   .error .hint {
     margin-top: 6px;
-    color: var(--ink-dim);
-    font-size: 11px;
+    color: var(--color-ink-dim);
+    font-size: var(--text-micro);
   }
 
   footer {
@@ -302,21 +305,22 @@
     justify-content: center;
     gap: 8px;
     padding-top: 18px;
-    border-top: 1px solid var(--border);
-    font-size: 11px;
-    color: var(--ink-faint);
-    font-family: var(--mono);
+    border-top: 1px solid var(--color-border);
+    font-size: var(--text-micro);
+    color: var(--color-ink-faint);
+    font-family: var(--font-mono);
   }
 
   button.link {
     background: none;
     border: none;
-    color: var(--accent);
+    color: var(--color-accent);
     cursor: pointer;
-    font-family: var(--mono);
-    font-size: 11px;
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
     padding: 0;
     text-decoration: underline;
+    transition: opacity var(--duration-fast) var(--ease-standard);
   }
   button.link:hover {
     opacity: 0.8;
