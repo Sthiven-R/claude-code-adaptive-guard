@@ -57,8 +57,20 @@ def log_decision(
     missing_aspects: list[str] | None = None,
     prompt_chars: int = 0,
     response_chars: int = 0,
+    transcript_path: str = "",
+    prompt_uuid: str | None = None,
+    response_uuid: str | None = None,
 ) -> None:
-    """Write a single anonymized decision record with full breakdown."""
+    """Write a single anonymized decision record with full breakdown.
+
+    `transcript_path`, `prompt_uuid`, `response_uuid` are an opt-in
+    pointer into the Claude Code transcript that produced this decision.
+    They allow the dashboard to fetch the underlying prompt/response
+    text on demand WITHOUT us duplicating that text on disk — the text
+    is read from Claude Code's transcript file, not from our telemetry.
+    Privacy invariant intact: this file still contains zero prompt or
+    response text, only metadata pointing to where it lives.
+    """
     if _is_disabled_by_env():
         return
     if not cfg.get("telemetry_enabled", True):
@@ -91,6 +103,17 @@ def log_decision(
             record["depth_breakdown"] = depth_breakdown
         if missing_aspects:
             record["missing_aspects"] = missing_aspects
+
+        # Transcript pointer (Sprint 10). All three fields are optional
+        # for backward compatibility with records written before this
+        # field existed: an older record with no transcript_path simply
+        # cannot be looked up — the dashboard handles that gracefully.
+        if transcript_path:
+            record["transcript_path"] = transcript_path
+        if prompt_uuid:
+            record["prompt_uuid"] = prompt_uuid
+        if response_uuid:
+            record["response_uuid"] = response_uuid
 
         with LOG_FILE.open("a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")

@@ -44,6 +44,12 @@ pub struct TelemetryStatus {
 }
 
 /// One decision record, matching the shape written by telemetry.py.
+///
+/// The optional `transcript_path` / `prompt_uuid` / `response_uuid`
+/// fields (added in Sprint 10) point back to the Claude Code transcript
+/// that produced the decision, so the dashboard can fetch the
+/// underlying text on demand. Older records (pre-Sprint-10) lack these
+/// pointers — we treat that as "context not available" without erroring.
 #[derive(Serialize, Deserialize, Clone)]
 pub struct TelemetryRecord {
     pub ts: String,
@@ -71,6 +77,25 @@ pub struct TelemetryRecord {
     pub depth_breakdown: Option<serde_json::Value>,
     #[serde(default)]
     pub missing_aspects: Option<Vec<String>>,
+    #[serde(default)]
+    pub transcript_path: Option<String>,
+    #[serde(default)]
+    pub prompt_uuid: Option<String>,
+    #[serde(default)]
+    pub response_uuid: Option<String>,
+}
+
+/// Find the (cached) record matching a given (session_id, ts) tuple.
+/// Returns None if no record matches. Public so other modules
+/// (decision_context.rs, feedback.rs) can resolve a decision without
+/// re-implementing the same lookup.
+pub fn find_record(session_id: &str, ts: &str) -> Option<TelemetryRecord> {
+    with_records(|records| {
+        records
+            .iter()
+            .find(|r| r.session_id == session_id && r.ts == ts)
+            .cloned()
+    })
 }
 
 /// Aggregated statistics across the full telemetry set.

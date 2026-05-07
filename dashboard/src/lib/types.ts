@@ -30,6 +30,29 @@ export type TelemetryRecord = {
   complexity_breakdown?: ScoreBreakdown | null;
   depth_breakdown?: ScoreBreakdown | null;
   missing_aspects?: string[] | null;
+  // Optional pointer back to the originating Claude Code transcript.
+  // Records written before Sprint 10 lack these fields and the
+  // dashboard treats that as "context not available".
+  transcript_path?: string | null;
+  prompt_uuid?: string | null;
+  response_uuid?: string | null;
+};
+
+/** On-demand prompt/response text resolved from Claude Code's transcript. */
+export type DecisionContext = {
+  prompt: string | null;
+  response: string | null;
+  /** Populated when the lookup failed (transcript missing, pre-Sprint-10
+   *  record, etc.). The UI displays a graceful message; the string here
+   *  is for diagnosis. */
+  error: string | null;
+};
+
+/** Operator's current judgment on a decision. */
+export type FeedbackStatus = {
+  /** "useful" | "annoying" | null. Null means no current feedback. */
+  label: string | null;
+  note: string | null;
 };
 
 export type TelemetryStats = {

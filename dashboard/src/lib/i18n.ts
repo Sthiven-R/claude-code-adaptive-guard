@@ -226,6 +226,29 @@ const en = {
     score_depth_short: "d",
     score_depth_tooltip:
       "Response depth (0-100). How thorough the response looked, computed from markdown structure, code blocks, and lexical diversity. Dash means the prompt was trivial and the response was not evaluated.",
+    context_show: "Show the prompt and response",
+    context_hide: "Hide",
+    context_loading: "Reading from transcript…",
+    context_error_no_pointer:
+      "This decision was recorded before the transcript-pointer feature shipped. The original prompt and response cannot be looked up.",
+    context_error_missing:
+      "The transcript file is no longer on disk — Claude Code may have rotated or deleted it. The decision metadata is preserved, but the original text is gone.",
+    context_error_generic:
+      "Could not load context. The transcript may be corrupted or the line was deleted.",
+    context_prompt_label: "Prompt",
+    context_response_label: "Response",
+    feedback_section_label: "Was this decision useful?",
+    feedback_useful: "Useful",
+    feedback_useful_tooltip:
+      "The decision agreed with your judgment — block was correct, or pass was correct.",
+    feedback_annoying: "Annoying",
+    feedback_annoying_tooltip:
+      "The decision disagreed with your judgment — it blocked something fine, or let something shallow through.",
+    feedback_clear: "Clear",
+    feedback_clear_tooltip:
+      "Remove your prior feedback for this decision.",
+    feedback_note_placeholder: "Optional note: why?",
+    feedback_saved: "Saved",
   },
   breakdown: {
     not_evaluated: "not evaluated",
@@ -450,6 +473,29 @@ const es = {
     score_depth_short: "p",
     score_depth_tooltip:
       "Profundidad de la respuesta (0-100). Qué tan completa se veía la respuesta, calculado desde estructura markdown, bloques de código y diversidad léxica. El guion significa que el prompt era trivial y la respuesta no se evaluó.",
+    context_show: "Ver el prompt y la respuesta",
+    context_hide: "Ocultar",
+    context_loading: "Leyendo del transcript…",
+    context_error_no_pointer:
+      "Esta decisión se registró antes de que existiera el puntero al transcript. El prompt y la respuesta originales no se pueden recuperar.",
+    context_error_missing:
+      "El archivo del transcript ya no está en disco — Claude Code pudo haberlo rotado o eliminado. Los metadatos de la decisión se conservan, pero el texto original se perdió.",
+    context_error_generic:
+      "No se pudo cargar el contexto. El transcript puede estar corrupto o la línea fue eliminada.",
+    context_prompt_label: "Prompt",
+    context_response_label: "Respuesta",
+    feedback_section_label: "¿Fue útil esta decisión?",
+    feedback_useful: "Útil",
+    feedback_useful_tooltip:
+      "La decisión coincidió con tu juicio — el bloqueo fue correcto, o el pase fue correcto.",
+    feedback_annoying: "Molesta",
+    feedback_annoying_tooltip:
+      "La decisión chocó con tu juicio — bloqueó algo bueno, o dejó pasar algo superficial.",
+    feedback_clear: "Borrar",
+    feedback_clear_tooltip:
+      "Eliminar tu feedback previo para esta decisión.",
+    feedback_note_placeholder: "Nota opcional: ¿por qué?",
+    feedback_saved: "Guardado",
   },
   breakdown: {
     not_evaluated: "no evaluado",

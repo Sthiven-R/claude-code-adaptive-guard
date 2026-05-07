@@ -28,6 +28,11 @@ dirs = "5"
 notify = "6"
 notify-debouncer-full = "0.3"
 
+[dev-dependencies]
+# Used by decision_context.rs and feedback.rs unit tests to build
+# disposable transcript / feedback files under the OS temp dir.
+tempfile = "3"
+
 [profile.release]
 panic = "abort"
 codegen-units = 1

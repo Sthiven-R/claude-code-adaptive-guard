@@ -1,5 +1,6 @@
 <script lang="ts">
-  import type { TelemetryRecord } from "../types";
+  import { invoke } from "@tauri-apps/api/core";
+  import type { DecisionContext, FeedbackStatus, TelemetryRecord } from "../types";
   import { formatListLabel, formatRelative } from "../time";
   import { fmt, t } from "../i18n";
   import BreakdownPanel from "./BreakdownPanel.svelte";
@@ -34,6 +35,128 @@
 
   function formatScore(v: number | null): string {
     return v === null ? "—" : String(v);
+  }
+
+  // --- Context lookup (Sprint 10) -----------------------------------
+  // The prompt/response text lives in Claude Code's transcript, not in
+  // our telemetry. We fetch it on-demand only when the operator clicks
+  // "Show prompt and response", to avoid round-tripping the heavy text
+  // for every card on every refresh.
+  let contextOpen = $state(false);
+  let context: DecisionContext | null = $state(null);
+  let contextLoading = $state(false);
+
+  async function toggleContext() {
+    if (contextOpen) {
+      contextOpen = false;
+      return;
+    }
+    contextOpen = true;
+    if (context !== null) return; // already loaded
+    contextLoading = true;
+    try {
+      context = await invoke<DecisionContext>("decision_get_context", {
+        sessionId: record.session_id,
+        ts: record.ts,
+      });
+    } catch (e) {
+      context = {
+        prompt: null,
+        response: null,
+        error: e instanceof Error ? e.message : String(e),
+      };
+    } finally {
+      contextLoading = false;
+    }
+  }
+
+  // --- Feedback (Sprint 10) -----------------------------------------
+  // Lazy-loaded on first expand of the card (not on every list render),
+  // because we list ~50 cards by default and we don't want N invoke
+  // round-trips for the common case where the operator does not give
+  // feedback.
+  let feedback: FeedbackStatus | null = $state(null);
+  let feedbackLoaded = $state(false);
+  let noteDraft = $state("");
+  let noteSaving = $state(false);
+  let noteSavedAt = $state(0);
+  let noteDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+  $effect(() => {
+    // Load feedback exactly once per card, on first expand.
+    if (expanded && !feedbackLoaded) {
+      feedbackLoaded = true;
+      void refreshFeedback();
+    }
+  });
+
+  async function refreshFeedback() {
+    try {
+      const s = await invoke<FeedbackStatus>("feedback_get", {
+        sessionId: record.session_id,
+        decisionTs: record.ts,
+      });
+      feedback = s;
+      noteDraft = s.note ?? "";
+    } catch {
+      feedback = { label: null, note: null };
+    }
+  }
+
+  async function setFeedback(label: "useful" | "annoying") {
+    // If they click the same label twice, treat it as a clear.
+    if (feedback?.label === label) {
+      await clearFeedback();
+      return;
+    }
+    try {
+      const s = await invoke<FeedbackStatus>("feedback_set", {
+        sessionId: record.session_id,
+        decisionTs: record.ts,
+        label,
+        note: noteDraft.trim() || null,
+      });
+      feedback = s;
+    } catch {
+      /* swallow — the lookup on next expand will recover */
+    }
+  }
+
+  async function clearFeedback() {
+    try {
+      const s = await invoke<FeedbackStatus>("feedback_clear", {
+        sessionId: record.session_id,
+        decisionTs: record.ts,
+      });
+      feedback = s;
+      noteDraft = "";
+    } catch {
+      /* swallow */
+    }
+  }
+
+  function onNoteInput() {
+    // Debounce: the operator stops typing for 700 ms before we persist.
+    // Saving on every keystroke would write a JSONL line per character.
+    if (noteDebounceTimer) clearTimeout(noteDebounceTimer);
+    if (!feedback?.label) return; // a note without a label is meaningless; skip
+    noteDebounceTimer = setTimeout(async () => {
+      noteSaving = true;
+      try {
+        const s = await invoke<FeedbackStatus>("feedback_set", {
+          sessionId: record.session_id,
+          decisionTs: record.ts,
+          label: feedback!.label,
+          note: noteDraft.trim() || null,
+        });
+        feedback = s;
+        noteSavedAt = Date.now();
+      } catch {
+        /* swallow */
+      } finally {
+        noteSaving = false;
+      }
+    }, 700);
   }
 </script>
 
@@ -127,6 +250,95 @@
           </ul>
         </div>
       {/if}
+
+      <!-- Sprint 10: prompt/response context, on-demand -->
+      <div class="context-section">
+        <button
+          class="context-toggle"
+          onclick={toggleContext}
+          aria-expanded={contextOpen}
+        >
+          <Icon name="chevron" size={12} />
+          {contextOpen ? $t.decision.context_hide : $t.decision.context_show}
+        </button>
+
+        {#if contextOpen}
+          <div class="context-body">
+            {#if contextLoading}
+              <div class="context-status">{$t.decision.context_loading}</div>
+            {:else if context?.error}
+              <div class="context-error">
+                {#if !record.transcript_path}
+                  {$t.decision.context_error_no_pointer}
+                {:else if context.error.includes("missing") || context.error.includes("rotated")}
+                  {$t.decision.context_error_missing}
+                {:else}
+                  {$t.decision.context_error_generic}
+                {/if}
+              </div>
+            {:else if context}
+              {#if context.prompt}
+                <div class="context-block">
+                  <div class="context-label">{$t.decision.context_prompt_label}</div>
+                  <pre class="context-text">{context.prompt}</pre>
+                </div>
+              {/if}
+              {#if context.response}
+                <div class="context-block">
+                  <div class="context-label">{$t.decision.context_response_label}</div>
+                  <pre class="context-text">{context.response}</pre>
+                </div>
+              {/if}
+            {/if}
+          </div>
+        {/if}
+      </div>
+
+      <!-- Sprint 10: operator feedback on this decision -->
+      <div class="feedback-section">
+        <div class="feedback-head">{$t.decision.feedback_section_label}</div>
+        <div class="feedback-controls">
+          <button
+            class="fb-btn useful"
+            class:active={feedback?.label === "useful"}
+            onclick={() => setFeedback("useful")}
+            title={$t.decision.feedback_useful_tooltip}
+          >
+            ↑ {$t.decision.feedback_useful}
+          </button>
+          <button
+            class="fb-btn annoying"
+            class:active={feedback?.label === "annoying"}
+            onclick={() => setFeedback("annoying")}
+            title={$t.decision.feedback_annoying_tooltip}
+          >
+            ↓ {$t.decision.feedback_annoying}
+          </button>
+          {#if feedback?.label}
+            <button
+              class="fb-btn clear"
+              onclick={clearFeedback}
+              title={$t.decision.feedback_clear_tooltip}
+            >
+              {$t.decision.feedback_clear}
+            </button>
+          {/if}
+          {#if noteSaving}
+            <span class="fb-saved">…</span>
+          {:else if feedback?.label && noteSavedAt > 0}
+            <span class="fb-saved">{$t.decision.feedback_saved}</span>
+          {/if}
+        </div>
+        {#if feedback?.label}
+          <textarea
+            class="fb-note"
+            placeholder={$t.decision.feedback_note_placeholder}
+            bind:value={noteDraft}
+            oninput={onNoteInput}
+            rows="2"
+          ></textarea>
+        {/if}
+      </div>
     </div>
   {/if}
 </article>
@@ -320,6 +532,153 @@
   }
   .missing-section li {
     margin-bottom: 3px;
+  }
+
+  /* ---- Sprint 10 sections ---------------------------------------- */
+
+  .context-section {
+    margin-top: 12px;
+  }
+  .context-toggle {
+    background: transparent;
+    border: 1px dashed var(--color-border);
+    color: var(--color-ink-dim);
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color var(--duration-fast) var(--ease-standard),
+                border-color var(--duration-fast) var(--ease-standard);
+  }
+  .context-toggle:hover {
+    color: var(--color-ink);
+    border-color: var(--color-accent);
+  }
+  .context-body {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .context-status,
+  .context-error {
+    font-size: var(--text-small);
+    color: var(--color-ink-dim);
+    padding: 8px 10px;
+    background: var(--color-bg-base);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    line-height: var(--leading-normal);
+  }
+  .context-error {
+    color: var(--color-ink);
+    background: var(--color-alert-soft);
+    border-color: var(--color-alert);
+  }
+  .context-block {
+    background: var(--color-bg-base);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+  }
+  .context-label {
+    font-size: var(--text-mono-micro);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wider);
+    color: var(--color-ink-faint);
+    margin-bottom: 4px;
+    font-family: var(--font-mono);
+    font-weight: var(--weight-semibold);
+  }
+  .context-text {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-small);
+    color: var(--color-ink);
+    line-height: var(--leading-normal);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 240px;
+    overflow-y: auto;
+  }
+
+  .feedback-section {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--color-border);
+  }
+  .feedback-head {
+    font-size: var(--text-micro);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wider);
+    color: var(--color-ink-faint);
+    margin-bottom: 6px;
+    font-family: var(--font-mono);
+  }
+  .feedback-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .fb-btn {
+    background: var(--color-bg-base);
+    border: 1px solid var(--color-border);
+    color: var(--color-ink-dim);
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+    padding: 4px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-standard);
+  }
+  .fb-btn:hover {
+    color: var(--color-ink);
+  }
+  .fb-btn.useful.active {
+    background: var(--color-success-soft);
+    border-color: var(--color-success);
+    color: var(--color-success);
+    font-weight: var(--weight-semibold);
+  }
+  .fb-btn.annoying.active {
+    background: var(--color-alert-soft);
+    border-color: var(--color-alert);
+    color: var(--color-alert);
+    font-weight: var(--weight-semibold);
+  }
+  .fb-btn.clear {
+    border-style: dashed;
+    color: var(--color-ink-faint);
+  }
+  .fb-saved {
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-micro);
+    color: var(--color-ink-faint);
+    margin-left: 4px;
+  }
+  .fb-note {
+    margin-top: 8px;
+    width: 100%;
+    background: var(--color-bg-base);
+    border: 1px solid var(--color-border);
+    color: var(--color-ink);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-small);
+    line-height: var(--leading-normal);
+    resize: vertical;
+    min-height: 38px;
+    transition: border-color var(--duration-fast) var(--ease-standard);
+  }
+  .fb-note:focus-visible {
+    border-color: var(--color-accent);
+    outline: none;
   }
 
   /* Responsive: stack on narrow widths */

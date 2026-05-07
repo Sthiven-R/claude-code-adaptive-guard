@@ -162,6 +162,44 @@ def extract_text_from_blocks(content) -> str:
     return "\n".join(texts)
 
 
+def _find_last_visible(transcript_path: str, role: str) -> tuple[str, str | None]:
+    """Walk transcript backwards, return (text, uuid) of the most recent
+    visible message for the given role.
+
+    `text` is empty and `uuid` is None when nothing is found. The uuid is
+    captured even when present alongside non-visible content; we only
+    return early once we have both visible text AND the line's uuid.
+
+    `uuid` is the per-turn identifier Claude Code writes alongside each
+    transcript line. We persist it in telemetry so the dashboard can
+    later jump back to the exact prompt/response pair that produced a
+    decision, without us having to duplicate the text on disk.
+    """
+    for line in _iter_tail_lines_reversed(transcript_path):
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+
+        if event.get("type") != role:
+            continue
+
+        message = event.get("message")
+        if not isinstance(message, dict):
+            continue
+
+        content = message.get("content")
+        text = extract_text_from_blocks(content)
+        if not text.strip():
+            continue
+
+        uuid_raw = event.get("uuid")
+        uuid = uuid_raw if isinstance(uuid_raw, str) and uuid_raw else None
+        return text, uuid
+
+    return "", None
+
+
 def extract_last_user_prompt(transcript_path: str) -> str:
     """Walk transcript backwards, return the most recent user prompt.
 
@@ -171,25 +209,17 @@ def extract_last_user_prompt(transcript_path: str) -> str:
 
     Returns "" if not found or path invalid.
     """
-    for line in _iter_tail_lines_reversed(transcript_path):
-        try:
-            event = json.loads(line)
-        except json.JSONDecodeError:
-            continue
+    text, _ = _find_last_visible(transcript_path, "user")
+    return text
 
-        if event.get("type") != "user":
-            continue
 
-        message = event.get("message")
-        if not isinstance(message, dict):
-            continue
+def extract_last_user_prompt_with_uuid(transcript_path: str) -> tuple[str, str | None]:
+    """Same as `extract_last_user_prompt` but also returns the line's uuid.
 
-        content = message.get("content")
-        text = extract_text_from_blocks(content)
-        if text.strip():
-            return text
-
-    return ""
+    Used by analyze.py so telemetry can persist the exact transcript
+    pointer for later context lookup from the dashboard.
+    """
+    return _find_last_visible(transcript_path, "user")
 
 
 def extract_last_assistant_text(transcript_path: str) -> str:
@@ -199,22 +229,17 @@ def extract_last_assistant_text(transcript_path: str) -> str:
     last_assistant_message. Uses the same bounded read as
     extract_last_user_prompt.
     """
-    for line in _iter_tail_lines_reversed(transcript_path):
-        try:
-            event = json.loads(line)
-        except json.JSONDecodeError:
-            continue
+    text, _ = _find_last_visible(transcript_path, "assistant")
+    return text
 
-        if event.get("type") != "assistant":
-            continue
 
-        message = event.get("message")
-        if not isinstance(message, dict):
-            continue
+def extract_last_assistant_text_with_uuid(transcript_path: str) -> tuple[str, str | None]:
+    """Same as `extract_last_assistant_text` but also returns the uuid.
 
-        content = message.get("content")
-        text = extract_text_from_blocks(content)
-        if text.strip():
-            return text
-
-    return ""
+    The hook input usually carries `last_assistant_message` directly
+    (no transcript walk needed for the text), but we still need the
+    uuid for context lookup — so this helper exists for the case
+    where we DO walk the transcript and want to capture the pointer
+    in one pass.
+    """
+    return _find_last_visible(transcript_path, "assistant")

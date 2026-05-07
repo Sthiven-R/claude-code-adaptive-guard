@@ -39,8 +39,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 # dependents on analyze).
 from config import load_config  # noqa: E402
 from transcript import (  # noqa: E402
-    extract_last_assistant_text,
-    extract_last_user_prompt,
+    extract_last_assistant_text_with_uuid,
+    extract_last_user_prompt_with_uuid,
 )
 from output import build_block_reason, emit_block_decision  # noqa: E402
 from complexity import score_complexity_explained  # noqa: E402
@@ -80,17 +80,28 @@ def main() -> int:
 
         transcript_path = hook_input.get("transcript_path", "") or ""
 
-        # Fallback: parse the transcript if the hook input lacks the response.
-        if not assistant_response and transcript_path:
-            assistant_response = extract_last_assistant_text(transcript_path)
+        # User prompt + assistant uuid both come from the transcript.
+        # We need the uuids so the dashboard can later jump from a
+        # decision back to the originating prompt/response pair without
+        # us duplicating the text on disk (privacy invariant).
+        user_prompt = ""
+        prompt_uuid: str | None = None
+        response_uuid: str | None = None
+        if transcript_path:
+            user_prompt, prompt_uuid = extract_last_user_prompt_with_uuid(
+                transcript_path
+            )
+            assistant_text_from_transcript, response_uuid = (
+                extract_last_assistant_text_with_uuid(transcript_path)
+            )
+            # Fallback: use the transcript-extracted assistant text only
+            # when the hook input lacks the response. The hook input is
+            # canonical when present; the transcript is the safety net.
+            if not assistant_response:
+                assistant_response = assistant_text_from_transcript
 
         if not assistant_response.strip():
             return 0
-
-        # User prompt is only available via transcript.
-        user_prompt = ""
-        if transcript_path:
-            user_prompt = extract_last_user_prompt(transcript_path)
 
         if not user_prompt.strip():
             return 0
@@ -108,6 +119,9 @@ def main() -> int:
                 complexity_breakdown=c_breakdown,
                 prompt_chars=prompt_chars,
                 response_chars=response_chars,
+                transcript_path=transcript_path,
+                prompt_uuid=prompt_uuid,
+                response_uuid=response_uuid,
             )
             return 0
 
@@ -122,6 +136,9 @@ def main() -> int:
                 depth_breakdown=d_breakdown,
                 prompt_chars=prompt_chars,
                 response_chars=response_chars,
+                transcript_path=transcript_path,
+                prompt_uuid=prompt_uuid,
+                response_uuid=response_uuid,
             )
             return 0
 
@@ -139,6 +156,9 @@ def main() -> int:
             missing_aspects=missing,
             prompt_chars=prompt_chars,
             response_chars=response_chars,
+            transcript_path=transcript_path,
+            prompt_uuid=prompt_uuid,
+            response_uuid=response_uuid,
         )
 
         emit_block_decision(reason)
