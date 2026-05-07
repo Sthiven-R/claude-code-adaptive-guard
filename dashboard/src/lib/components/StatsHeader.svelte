@@ -51,24 +51,40 @@
     </div>
   {:else}
     <div class="metrics">
-      <MetricCard label={$t.stats.total}>
+      <MetricCard label={$t.stats.total} labelTooltip={$t.stats.total_tooltip}>
         {#snippet value()}<CountUp value={stats.total} />{/snippet}
       </MetricCard>
 
-      <MetricCard label={$t.stats.blocks} variant="block" sub={pct(stats.block_ratio)}>
+      <MetricCard
+        label={$t.stats.blocks}
+        labelTooltip={$t.stats.blocks_tooltip}
+        variant="block"
+        sub={pct(stats.block_ratio)}
+      >
         {#snippet value()}<CountUp value={stats.block_count} />{/snippet}
       </MetricCard>
 
-      <MetricCard label={$t.stats.deep_allowed} variant="deep" sub={pct(stats.deep_ratio)}>
+      <MetricCard
+        label={$t.stats.deep_allowed}
+        labelTooltip={$t.stats.deep_allowed_tooltip}
+        variant="deep"
+        sub={pct(stats.deep_ratio)}
+      >
         {#snippet value()}<CountUp value={stats.allow_deep_count} />{/snippet}
       </MetricCard>
 
-      <MetricCard label={$t.stats.simple_skipped} variant="simple" sub={pct(stats.simple_ratio)}>
+      <MetricCard
+        label={$t.stats.simple_skipped}
+        labelTooltip={$t.stats.simple_skipped_tooltip}
+        variant="simple"
+        sub={pct(stats.simple_ratio)}
+      >
         {#snippet value()}<CountUp value={stats.allow_simple_count} />{/snippet}
       </MetricCard>
 
       <MetricCard
         label={$t.stats.tokens_in_out}
+        labelTooltip={$t.stats.tokens_in_out_tooltip}
         variant="tokens"
         sub={$t.stats.chars_estimate}
         subTitle={$t.stats.chars_estimate_hint}
@@ -82,6 +98,7 @@
 
       <MetricCard
         label={$t.stats.since}
+        labelTooltip={$t.stats.since_tooltip}
         variant="window"
         valueSmall
         sub={`${$t.stats.last} ${stats.last_ts ? formatRelative(stats.last_ts, $t.time, now) : "—"}`}

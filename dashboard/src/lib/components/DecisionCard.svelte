@@ -54,12 +54,12 @@
     </div>
 
     <div class="scores">
-      <span class="score">
-        <span class="score-label">c</span>
+      <span class="score" title={$t.decision.score_complexity_tooltip}>
+        <span class="score-label">{$t.decision.score_complexity_short}</span>
         <span class="score-value">{formatScore(record.complexity)}</span>
       </span>
-      <span class="score">
-        <span class="score-label">d</span>
+      <span class="score" title={$t.decision.score_depth_tooltip}>
+        <span class="score-label">{$t.decision.score_depth_short}</span>
         <span class="score-value">{formatScore(record.depth)}</span>
       </span>
     </div>

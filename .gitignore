@@ -24,8 +24,13 @@ Thumbs.db
 config/local.json
 .env
 
-# wrangler files
+# wrangler files (Cloudflare Workers config — added by the
+# cloudflare-workers-and-pages bot via PR #1)
 .wrangler
 .dev.vars*
 !.dev.vars.example
 !.env.example
+
+# Local-built portable binary (built via `npm run tauri build --no-bundle`).
+# Not versioned — release artifacts ship through the GitHub release page.
+/Adaptive Guard.exe

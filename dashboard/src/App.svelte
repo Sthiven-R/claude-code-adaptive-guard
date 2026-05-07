@@ -19,6 +19,7 @@
   import Welcome from "./lib/components/Welcome.svelte";
   import SettingsModal from "./lib/components/SettingsModal.svelte";
   import Icon from "./lib/components/Icon.svelte";
+  import HowToRead from "./lib/components/HowToRead.svelte";
 
   // Version is fetched from the Tauri backend (CARGO_PKG_VERSION) so
   // there is one source of truth for the four version-bearing files
@@ -175,6 +176,7 @@
       onSkip={() => (welcomeSkipped = true)}
     />
   {:else}
+    <HowToRead />
     <StatsHeader {stats} profile={activeProfile} {version} {now} />
 
     {#if errorMsg}
@@ -207,11 +209,13 @@
     <ScoreHistogram
       buckets={complexityHist}
       title={$t.histogram.complexity_distribution}
+      titleTooltip={$t.histogram.complexity_distribution_tooltip}
       threshold={complexityThreshold}
     />
     <ScoreHistogram
       buckets={depthHist}
       title={$t.histogram.depth_distribution}
+      titleTooltip={$t.histogram.depth_distribution_tooltip}
       threshold={depthThreshold}
     />
   </div>

@@ -41,7 +41,7 @@
   <div class="head">
     <span class="label">{label}</span>
     {#if breakdown?.total !== undefined}
-      <span class="total">{breakdown.total} / 100</span>
+      <span class="total" title={$t.breakdown.total_tooltip}>{breakdown.total} / 100</span>
     {/if}
   </div>
 

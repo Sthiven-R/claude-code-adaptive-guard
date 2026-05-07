@@ -9,6 +9,14 @@
 //
 // Adding a new key: add it to `en` first. TypeScript will then force
 // you to add it to `es` (or any future locale) via the `Dict` type.
+//
+// UX-writing principle (Sprint 9): every string a non-technical user
+// sees must read as plain language, not as identifiers from the code.
+// `BLOCK` / `DEEP` / `SKIP` were the internal decision strings; the
+// tags now read `RETRY` / `PASS` / `TRIVIAL` because that is what a
+// human watching the dashboard actually wants to see. Tooltips
+// (the `*_tooltip` keys) carry the technical detail for whoever
+// hovers — invisible to the casual viewer, available to the curious.
 
 import { derived, writable } from "svelte/store";
 
@@ -131,39 +139,57 @@ const en = {
     theme_auto: "Auto",
   },
   stats: {
-    profile: "profile:",
+    profile: "preset:",
+    profile_tooltip:
+      "Active scoring preset. Defines how strict the guard is. Switch via `adaptive-guard install --profile`.",
     no_decisions:
       "No decisions recorded yet. Run Claude Code with the hook installed, then come back here.",
-    total: "Total",
-    blocks: "Blocks",
-    deep_allowed: "Deep allowed",
-    simple_skipped: "Simple (skipped)",
-    tokens_in_out: "Tokens in / out (~)",
+    total: "Decisions seen",
+    total_tooltip:
+      "Every Claude Code response that flowed through the guard, including the trivial ones.",
+    blocks: "Forced retry",
+    blocks_tooltip:
+      "The guard judged the prompt complex but the response shallow, blocked the stop, and asked Claude to rethink. Each one is a moment of saved frustration.",
+    deep_allowed: "Passed",
+    deep_allowed_tooltip:
+      "Response had enough analytical depth — markdown structure, code blocks, varied phrasing — and was allowed through.",
+    simple_skipped: "Trivial",
+    simple_skipped_tooltip:
+      "Prompt was too simple to deserve a deep response (e.g. \"what time is it?\"). The guard never evaluates the response in this case.",
+    tokens_in_out: "Tokens (estimated)",
+    tokens_in_out_tooltip:
+      "Rough estimate of total tokens that flowed in and out, computed as chars/4. Diverges for non-Latin scripts.",
     chars_estimate: "chars/4 estimate",
     chars_estimate_hint: "chars/4 heuristic; diverges for non-Latin scripts",
-    since: "Since",
-    last: "Last:",
-    block_tag: "block",
-    deep_tag: "deep",
-    avg_complexity: "avg complexity",
-    depth: "depth",
-    missing: "missing",
+    since: "First seen",
+    since_tooltip:
+      "When the very first decision in this telemetry file was recorded.",
+    last: "Latest:",
+    block_tag: "RETRY",
+    deep_tag: "PASS",
+    avg_complexity: "avg prompt complexity",
+    depth: "response depth",
+    missing: "gaps flagged",
     loading: "Loading…",
   },
   histogram: {
-    complexity_distribution: "Complexity distribution",
-    depth_distribution: "Depth distribution",
+    complexity_distribution: "How complex were your prompts",
+    complexity_distribution_tooltip:
+      "Distribution of prompt-complexity scores (0-100). The taller the bar, the more prompts landed in that range. The vertical line marks the threshold below which the guard never blocks.",
+    depth_distribution: "How deep were the responses",
+    depth_distribution_tooltip:
+      "Distribution of response-depth scores (0-100). The vertical line marks the threshold above which the guard never blocks, regardless of complexity.",
     no_data: "no data yet",
-    records: "records",
-    below_threshold: "below threshold",
-    at_or_above: "at or above",
+    records: "decisions",
+    below_threshold: "below the bar",
+    at_or_above: "at or above the bar",
   },
   filter: {
-    decision: "Decision",
-    block: "Block",
-    deep: "Deep",
-    simple: "Simple",
-    time: "Time",
+    decision: "Outcome",
+    block: "Retry",
+    deep: "Pass",
+    simple: "Trivial",
+    time: "Period",
     all_time: "All time",
     last_7_days: "Last 7 days",
     today: "Today",
@@ -175,23 +201,31 @@ const en = {
   live: {
     on: "LIVE",
     off: "PAUSED",
-    on_tooltip: "Live monitoring (watching telemetry file)",
-    off_tooltip: "Watcher paused",
+    on_tooltip:
+      "The guard is watching the telemetry file. New decisions appear here within a second of being recorded.",
+    off_tooltip:
+      "File watcher disabled. Hit Refresh to reload manually, or close and reopen the dashboard.",
   },
   decision: {
-    block: "BLOCK",
-    deep: "DEEP",
-    skip: "SKIP",
+    block: "RETRY",
+    deep: "PASS",
+    skip: "TRIVIAL",
     session: "Session",
-    profile: "Profile",
+    profile: "Preset",
     prompt: "Prompt",
     response: "Response",
     chars: "chars",
     thresholds: "Thresholds",
-    complexity_breakdown: "Complexity breakdown",
-    depth_breakdown: "Depth breakdown",
-    missing_aspects_head: "Missing aspects flagged by guard",
-    missing_n: "{n} missing",
+    complexity_breakdown: "Why we judged the prompt complex",
+    depth_breakdown: "Why we judged the response shallow or deep",
+    missing_aspects_head: "What was missing",
+    missing_n: "{n} gaps",
+    score_complexity_short: "c",
+    score_complexity_tooltip:
+      "Prompt complexity (0-100). How challenging the prompt looked, computed from length, code-density, technical tokens, and structure.",
+    score_depth_short: "d",
+    score_depth_tooltip:
+      "Response depth (0-100). How thorough the response looked, computed from markdown structure, code blocks, and lexical diversity. Dash means the prompt was trivial and the response was not evaluated.",
   },
   breakdown: {
     not_evaluated: "not evaluated",
@@ -200,9 +234,31 @@ const en = {
     blend: "blend:",
     semantic_short: "sem",
     structural_short: "struct",
-    axes_section: "Axes",
-    signals_section: "Signals detected",
+    axes_section: "Score breakdown",
+    signals_section: "What was detected",
     pts: "pts",
+    total_tooltip:
+      "Final score after blending structural and (optional) semantic layers, clamped to 0-100.",
+  },
+  how_to_read: {
+    title: "How to read this dashboard",
+    show: "How to read this dashboard",
+    hide: "Hide",
+    intro:
+      "Adaptive Guard sits between Claude Code and your screen. Every time Claude finishes a response, the guard rates two things on a 0–100 scale:",
+    point_complexity:
+      "How complex your prompt looked — based on length, technical tokens, code density, and how multi-part it was.",
+    point_depth:
+      "How thorough the response was — based on markdown structure, code blocks, and varied phrasing.",
+    outcome_intro: "Then it picks one of three outcomes:",
+    outcome_retry:
+      "Complex prompt, shallow response → the guard blocked the stop and asked Claude to rethink.",
+    outcome_pass:
+      "Response had enough depth → it was allowed through. No interruption.",
+    outcome_trivial:
+      "Prompt was too simple to bother grading the response → it was allowed through with no evaluation.",
+    privacy:
+      "Nothing leaves your machine. The guard stores only counters and scores in the telemetry file — never the text of your prompts or Claude's responses.",
   },
   time: {
     just_now: "just now",
@@ -306,40 +362,58 @@ const es = {
     theme_auto: "Auto",
   },
   stats: {
-    profile: "perfil:",
+    profile: "preset:",
+    profile_tooltip:
+      "Preset de evaluación activo. Define qué tan estricto es el guard. Cambia con `adaptive-guard install --profile`.",
     no_decisions:
       "Aún no se han registrado decisiones. Usa Claude Code con el hook instalado y vuelve aquí.",
-    total: "Total",
-    blocks: "Bloqueos",
-    deep_allowed: "Profundas permitidas",
-    simple_skipped: "Simples (saltadas)",
-    tokens_in_out: "Tokens entrada / salida (~)",
+    total: "Decisiones registradas",
+    total_tooltip:
+      "Cada respuesta de Claude Code que pasó por el guard, incluyendo las triviales.",
+    blocks: "Forzados a repensar",
+    blocks_tooltip:
+      "El guard juzgó el prompt complejo pero la respuesta superficial, bloqueó el cierre y le pidió a Claude repensar. Cada uno es un momento de frustración evitada.",
+    deep_allowed: "Pasaron",
+    deep_allowed_tooltip:
+      "La respuesta tuvo suficiente profundidad analítica — estructura markdown, bloques de código, fraseo variado — y se dejó pasar.",
+    simple_skipped: "Triviales",
+    simple_skipped_tooltip:
+      "El prompt era demasiado simple para merecer una respuesta profunda (ej. \"¿qué hora es?\"). El guard no evalúa la respuesta en este caso.",
+    tokens_in_out: "Tokens (estimado)",
+    tokens_in_out_tooltip:
+      "Estimación aproximada del total de tokens que entraron y salieron, calculado como caracteres/4. Diverge para alfabetos no latinos.",
     chars_estimate: "estimación caracteres/4",
     chars_estimate_hint:
       "heurística caracteres/4; diverge para alfabetos no latinos",
-    since: "Desde",
+    since: "Primera decisión",
+    since_tooltip:
+      "Cuándo se registró la primera decisión en este archivo de telemetría.",
     last: "Última:",
-    block_tag: "bloqueo",
-    deep_tag: "profunda",
-    avg_complexity: "complejidad media",
-    depth: "profundidad",
-    missing: "faltantes",
+    block_tag: "REPENSAR",
+    deep_tag: "PASA",
+    avg_complexity: "complejidad promedio del prompt",
+    depth: "profundidad de la respuesta",
+    missing: "vacíos detectados",
     loading: "Cargando…",
   },
   histogram: {
-    complexity_distribution: "Distribución de complejidad",
-    depth_distribution: "Distribución de profundidad",
+    complexity_distribution: "Qué tan complejos fueron tus prompts",
+    complexity_distribution_tooltip:
+      "Distribución de los puntajes de complejidad del prompt (0-100). Cuanto más alta la barra, más prompts cayeron en ese rango. La línea vertical marca el umbral debajo del cual el guard nunca bloquea.",
+    depth_distribution: "Qué tan profundas fueron las respuestas",
+    depth_distribution_tooltip:
+      "Distribución de los puntajes de profundidad de la respuesta (0-100). La línea vertical marca el umbral por encima del cual el guard nunca bloquea, sin importar la complejidad.",
     no_data: "aún sin datos",
-    records: "registros",
+    records: "decisiones",
     below_threshold: "bajo el umbral",
     at_or_above: "al umbral o por encima",
   },
   filter: {
-    decision: "Decisión",
-    block: "Bloqueo",
-    deep: "Profunda",
-    simple: "Simple",
-    time: "Tiempo",
+    decision: "Resultado",
+    block: "Repensar",
+    deep: "Pasa",
+    simple: "Trivial",
+    time: "Período",
     all_time: "Todo el tiempo",
     last_7_days: "Últimos 7 días",
     today: "Hoy",
@@ -351,23 +425,31 @@ const es = {
   live: {
     on: "EN VIVO",
     off: "PAUSADO",
-    on_tooltip: "Monitoreo en vivo (observando archivo de telemetría)",
-    off_tooltip: "Watcher pausado",
+    on_tooltip:
+      "El guard está observando el archivo de telemetría. Las nuevas decisiones aparecen aquí en menos de un segundo de ser registradas.",
+    off_tooltip:
+      "Watcher de archivo desactivado. Pulsa Actualizar para recargar manualmente, o cierra y reabre el dashboard.",
   },
   decision: {
-    block: "BLOQUEO",
-    deep: "PROFUNDA",
-    skip: "SALTADA",
+    block: "REPENSAR",
+    deep: "PASA",
+    skip: "TRIVIAL",
     session: "Sesión",
-    profile: "Perfil",
+    profile: "Preset",
     prompt: "Prompt",
     response: "Respuesta",
     chars: "caracteres",
     thresholds: "Umbrales",
-    complexity_breakdown: "Desglose de complejidad",
-    depth_breakdown: "Desglose de profundidad",
-    missing_aspects_head: "Aspectos faltantes detectados",
-    missing_n: "{n} faltantes",
+    complexity_breakdown: "Por qué juzgamos el prompt complejo",
+    depth_breakdown: "Por qué juzgamos la respuesta superficial o profunda",
+    missing_aspects_head: "Qué faltó",
+    missing_n: "{n} vacíos",
+    score_complexity_short: "c",
+    score_complexity_tooltip:
+      "Complejidad del prompt (0-100). Qué tan desafiante se veía el prompt, calculado desde longitud, densidad de código, tokens técnicos y estructura.",
+    score_depth_short: "p",
+    score_depth_tooltip:
+      "Profundidad de la respuesta (0-100). Qué tan completa se veía la respuesta, calculado desde estructura markdown, bloques de código y diversidad léxica. El guion significa que el prompt era trivial y la respuesta no se evaluó.",
   },
   breakdown: {
     not_evaluated: "no evaluado",
@@ -376,9 +458,31 @@ const es = {
     blend: "mezcla:",
     semantic_short: "sem",
     structural_short: "estruct",
-    axes_section: "Ejes",
-    signals_section: "Señales detectadas",
+    axes_section: "Desglose del puntaje",
+    signals_section: "Qué se detectó",
     pts: "pts",
+    total_tooltip:
+      "Puntaje final tras mezclar las capas estructural y (opcional) semántica, acotado a 0-100.",
+  },
+  how_to_read: {
+    title: "Cómo leer este tablero",
+    show: "Cómo leer este tablero",
+    hide: "Ocultar",
+    intro:
+      "Adaptive Guard se sienta entre Claude Code y tu pantalla. Cada vez que Claude termina una respuesta, el guard califica dos cosas en escala 0–100:",
+    point_complexity:
+      "Qué tan complejo se veía tu prompt — basado en longitud, tokens técnicos, densidad de código y cuántas partes tenía.",
+    point_depth:
+      "Qué tan completa fue la respuesta — basado en estructura markdown, bloques de código y fraseo variado.",
+    outcome_intro: "Después escoge uno de tres resultados:",
+    outcome_retry:
+      "Prompt complejo, respuesta superficial → el guard bloqueó el cierre y le pidió a Claude repensar.",
+    outcome_pass:
+      "La respuesta tuvo suficiente profundidad → se dejó pasar. Sin interrupción.",
+    outcome_trivial:
+      "El prompt era demasiado simple para molestarse en evaluar la respuesta → pasó sin evaluación.",
+    privacy:
+      "Nada sale de tu máquina. El guard sólo guarda contadores y puntajes en el archivo de telemetría — nunca el texto de tus prompts ni de las respuestas de Claude.",
   },
   time: {
     just_now: "ahora mismo",

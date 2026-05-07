@@ -2,9 +2,11 @@
   import type { HistogramBucket } from "../types";
   import { t } from "../i18n";
 
-  let { buckets, title, threshold }: {
+  let { buckets, title, titleTooltip, threshold }: {
     buckets: HistogramBucket[];
     title: string;
+    /** Plain-language explanation shown on title hover. */
+    titleTooltip?: string;
     threshold: number | null;
   } = $props();
 
@@ -43,7 +45,7 @@
 
 <div class="histogram">
   <div class="head">
-    <h3>{title}</h3>
+    <h3 title={titleTooltip ?? ""}>{title}</h3>
     <span class="total">{total} {$t.histogram.records}</span>
   </div>
 

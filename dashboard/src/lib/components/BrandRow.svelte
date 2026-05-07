@@ -22,7 +22,9 @@
     <Logo variant="full" size={22} />
   </div>
   <div class="meta">
-    <span class="profile">{$t.stats.profile} <strong>{profile}</strong></span>
+    <span class="profile" title={$t.stats.profile_tooltip}>
+      {$t.stats.profile} <strong>{profile}</strong>
+    </span>
     <span class="version">{version ? `v${version}` : ""}</span>
   </div>
 </div>

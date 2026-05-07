@@ -14,8 +14,10 @@
 
   type Variant = "default" | "block" | "deep" | "simple" | "tokens" | "window";
 
-  let { label, value, sub, subTitle, valueSmall = false, variant = "default" }: {
+  let { label, labelTooltip, value, sub, subTitle, valueSmall = false, variant = "default" }: {
     label: string;
+    /** Plain-language explanation shown on label hover. */
+    labelTooltip?: string;
     value: Snippet;
     sub?: string;
     subTitle?: string;
@@ -24,7 +26,7 @@
   } = $props();
 </script>
 
-<div class="metric {variant}">
+<div class="metric {variant}" title={labelTooltip ?? ""}>
   <div class="label">{label}</div>
   <div class="value" class:small={valueSmall}>{@render value()}</div>
   {#if sub}
